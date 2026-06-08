@@ -1,5 +1,5 @@
 const CACHE = 'simulador-mg-v1';
-const ASSETS = ['/', '/index.html', '/data/data.js'];
+const ASSETS = ['./', './index.html', './data/data.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
