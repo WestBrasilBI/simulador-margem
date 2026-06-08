@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0c4976">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Simulador de Margem</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --blue: #0c4976;
+    --blue-light: #1a6aa8;
+    --red: #e02e39;
+    --white: #ffffff;
+    --gray-bg: #f4f6f9;
+    --gray-border: #dde3ea;
+    --gray-text: #6b7a8d;
+    --green: #1d8a4e;
+    --text: #1a2533;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--blue);
+    color: var(--white);
+    padding: 14px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-row { display: flex; align-items: center; gap: 10px; }
+  .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+  .logo span { color: var(--red); }
+  .subtitle { font-size: 11px; opacity: 0.7; margin-top: 1px; }
+  .btn-reset {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  /* STEPS BAR */
+  .steps-bar {
+    background: var(--blue);
+    padding: 0 16px 14px;
+    display: flex;
+    gap: 6px;
+  }
+  .step-dot {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.25);
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: var(--white); }
+  .step-dot.done { background: rgba(255,255,255,0.55); }
+
+  /* SCREEN */
+  .screen { display: none; padding: 16px; }
+  .screen.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+
+  /* FORM ELEMENTS */
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-text); margin-bottom: 5px; }
+  input[type=text], input[type=number], select {
+    width: 100%;
+    border: 1.5px solid var(--gray-border);
+    border-radius: 8px;
+    padding: 11px 12px;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--blue); }
+  input.error { border-color: var(--red); }
+  .field-hint { font-size: 11px; color: var(--gray-text); margin-top: 4px; }
+
+  /* CLIENT SEARCH */
+  .search-wrap { position: relative; }
+  .autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: white;
+    border: 1.5px solid var(--blue);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+  .autocomplete-item {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-border);
+    font-size: 13px;
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item:active { background: var(--gray-bg); }
+  .autocomplete-item strong { display: block; color: var(--blue); font-weight: 700; }
+  .autocomplete-item span { color: var(--gray-text); font-size: 12px; }
+
+  /* CLIENT INFO BOX */
+  .client-info {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .client-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .client-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+  .client-badge {
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* PRAZO GRID */
+  .prazo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .prazo-btn {
+    border: 1.5px solid var(--gray-border);
+    border-radius: 8px;
+    padding: 10px 4px;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .prazo-btn .pct {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--gray-text);
+  }
+  .prazo-btn.selected {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: white;
+  }
+  .prazo-btn.selected .pct { color: rgba(255,255,255,0.7); }
+  .prazo-btn.neg .pct { color: var(--red); }
+  .prazo-btn.selected.neg .pct { color: rgba(255,255,255,0.7); }
+
+  /* PRODUCT CARDS */
+  .produto-card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1.5px solid var(--gray-border);
+  }
+  .produto-header {
+    background: var(--blue);
+    color: white;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .produto-num {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .produto-nome-header {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .btn-remove {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .produto-body { padding: 14px; }
+  .inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .input-group { }
+  .input-group label { font-size: 11px; font-weight: 600; color: var(--gray-text); margin-bottom: 4px; }
+  .input-group input {
+    width: 100%;
+    border: 1.5px solid var(--gray-border);
+    border-radius: 7px;
+    padding: 9px 10px;
+    font-size: 14px;
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--blue); }
+
+  .calc-section {
+    background: var(--gray-bg);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .calc-item { }
+  .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; }
+  .calc-value { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .calc-value.highlight { color: var(--blue); font-size: 15px; }
+  .calc-value.green { color: var(--green); }
+  .calc-value.red { color: var(--red); }
+
+  .separator { border: none; border-top: 1px solid var(--gray-border); margin: 10px 0; }
+
+  /* TOTALS */
+  .totals-card {
+    background: var(--blue);
+    color: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 4px;
+  }
+  .totals-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; opacity: 0.8; }
+  .totals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .total-item { }
+  .total-label { font-size: 10px; font-weight: 600; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.3px; }
+  .total-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .total-value.accent { color: #ffd166; }
+  .total-item.full { grid-column: 1 / -1; }
+
+  /* BUTTONS */
+  .btn-primary {
+    width: 100%;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--blue-light); }
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--blue);
+    border: 1.5px solid var(--blue);
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-add {
+    width: 100%;
+    background: white;
+    color: var(--blue);
+    border: 2px dashed var(--blue);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+  }
+  .btn-add:active { background: var(--gray-bg); }
+  .btn-add-icon { font-size: 22px; font-weight: 400; }
+
+  /* ALERTS */
+  .alert {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7c5700;
+    margin-bottom: 10px;
+  }
+  .alert.error { background: #fdecea; border-color: var(--red); color: #9b1a20; }
+
+  /* VERSION */
+  .version-tag {
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-text);
+    padding: 12px;
+  }
+
+  /* PRAZO SELECTED DISPLAY */
+  .prazo-display {
+    background: var(--gray-bg);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--gray-text);
+  }
+  .prazo-display strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div>
+      <div class="logo">WEST<span>.</span>BI</div>
+      <div class="subtitle">Simulador de Margem Unitária</div>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
+  </div>
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+</header>
+
+<!-- ═══════════════ TELA 1: CLIENTE ═══════════════ -->
+<div class="screen active" id="screen1">
+  <div class="card">
+    <div class="card-title">1. Identificação do Cliente</div>
+
+    <div class="search-wrap">
+      <label for="inputCliente">Código ou nome do cliente</label>
+      <input type="text" id="inputCliente" placeholder="Ex: 3657 ou G-KT Brasil..."
+             autocomplete="off" inputmode="text"
+             oninput="buscaCliente(this.value)"
+             onkeydown="navegarLista(event)">
+      <div class="autocomplete-list" id="autoList" style="display:none"></div>
+    </div>
+
+    <div id="clienteInfo" style="display:none; margin-top:14px;">
+      <div class="client-info">
+        <h3 id="clienteNome"></h3>
+        <div id="clienteDetalhes" class="client-info-row"></div>
+      </div>
+    </div>
+
+    <div id="clienteErro" class="alert error" style="display:none;margin-top:10px;">
+      Cliente não encontrado. Verifique o código.
+    </div>
+
+    <button class="btn-primary" id="btnProceed1" onclick="irParaTela2()" style="display:none">
+      Próximo: Prazo de Pagamento →
+    </button>
+  </div>
+  <div class="version-tag" id="versionTag">Carregando dados...</div>
+</div>
+
+<!-- ═══════════════ TELA 2: PRAZO ═══════════════ -->
+<div class="screen" id="screen2">
+  <div class="card">
+    <div class="card-title">2. Prazo de Pagamento</div>
+    <div class="prazo-grid" id="prazoGrid"></div>
+    <div class="prazo-display" id="prazoDisplay">Selecione um prazo acima</div>
+    <button class="btn-primary" id="btnProceed2" onclick="irParaTela3()" style="display:none">
+      Simular Produtos →
+    </button>
+    <button class="btn-secondary" onclick="irParaTela1()">← Voltar</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TELA 3: PRODUTOS ═══════════════ -->
+<div class="screen" id="screen3">
+  <div class="client-info" id="resumoClienteTopo" style="margin-bottom:12px;">
+    <h3 id="resumoNome"></h3>
+    <div id="resumoDetalhes" class="client-info-row"></div>
+  </div>
+
+  <div id="produtosList"></div>
+
+  <button class="btn-add" onclick="adicionarProduto()">
+    <span class="btn-add-icon">+</span> Adicionar Produto
+  </button>
+
+  <div class="totals-card" id="totalsCard" style="display:none; margin-top:16px;">
+    <div class="totals-title">Resumo da Simulação</div>
+    <div class="totals-grid">
+      <div class="total-item">
+        <div class="total-label">Volume Total (L)</div>
+        <div class="total-value" id="totVolume">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Faturamento Total</div>
+        <div class="total-value" id="totFaturamento">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Lucro Líq. Pós Premier</div>
+        <div class="total-value accent" id="totLucro">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Margem Final</div>
+        <div class="total-value accent" id="totMargem">—</div>
+      </div>
+      <div class="total-item full">
+        <div class="total-label">Unitária Final Pós Premier</div>
+        <div class="total-value accent" id="totUnitaria">—</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-secondary" style="margin-top:12px;" onclick="irParaTela2()">← Alterar Prazo</button>
+</div>
+
+<script src="data/data.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+<script>
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let clienteAtual = null;
+let prazoAtual   = null;
+let produtos     = [];    // array de objetos { id, cod, qtde, dpf, preco }
+let produtoIdSeq = 0;
+
+// ─── FORMATAÇÃO ──────────────────────────────────────────────────────────────
+const fmt = {
+  moeda: v => v == null || isNaN(v) ? '—' : 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
+  pct:   v => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1) + '%',
+  vol:   v => v == null || isNaN(v) ? '—' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' L',
+  num:   v => v == null || isNaN(v) ? '—' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  try {
+    const tag = document.getElementById('versionTag');
+    if (typeof DATA_VERSION !== 'undefined') tag.textContent = 'Dados de: ' + DATA_VERSION;
+    else tag.textContent = 'Dados carregados';
+    renderizarPrazos();
+  } catch(e) {
+    document.getElementById('versionTag').textContent = 'Erro ao carregar dados';
+  }
+});
+
+// ─── NAVEGAÇÃO ───────────────────────────────────────────────────────────────
+function setScreen(n) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i+1 === n));
+  ['dot1','dot2','dot3'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-dot' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
+  });
+  window.scrollTo(0,0);
+}
+
+function irParaTela1() { setScreen(1); }
+
+function irParaTela2() {
+  if (!clienteAtual) return;
+  setScreen(2);
+}
+
+function irParaTela3() {
+  if (!prazoAtual) return;
+  setScreen(3);
+  renderizarResumoTopo();
+  if (produtos.length === 0) adicionarProduto();
+}
+
+function resetAll() {
+  clienteAtual = null;
+  prazoAtual = null;
+  produtos = [];
+  produtoIdSeq = 0;
+  document.getElementById('inputCliente').value = '';
+  document.getElementById('clienteInfo').style.display = 'none';
+  document.getElementById('clienteErro').style.display = 'none';
+  document.getElementById('btnProceed1').style.display = 'none';
+  document.getElementById('autoList').style.display = 'none';
+  document.querySelectorAll('.prazo-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('prazoDisplay').textContent = 'Selecione um prazo acima';
+  document.getElementById('btnProceed2').style.display = 'none';
+  document.getElementById('produtosList').innerHTML = '';
+  document.getElementById('totalsCard').style.display = 'none';
+  setScreen(1);
+}
+
+// ─── TELA 1: CLIENTE ─────────────────────────────────────────────────────────
+let searchTimer = null;
+function buscaCliente(val) {
+  clearTimeout(searchTimer);
+  document.getElementById('clienteErro').style.display = 'none';
+  document.getElementById('clienteInfo').style.display = 'none';
+  document.getElementById('btnProceed1').style.display = 'none';
+  clienteAtual = null;
+
+  const v = val.trim();
+  if (!v) { document.getElementById('autoList').style.display = 'none'; return; }
+
+  // Busca exata por código numérico
+  if (/^\d+$/.test(v) && CLIENTES[v]) {
+    selecionarCliente(v, CLIENTES[v]);
+    document.getElementById('autoList').style.display = 'none';
+    return;
+  }
+
+  searchTimer = setTimeout(() => {
+    if (v.length < 3) { document.getElementById('autoList').style.display = 'none'; return; }
+    const vLow = v.toLowerCase();
+    const matches = [];
+    for (const [cod, c] of Object.entries(CLIENTES)) {
+      if (c.nome.toLowerCase().includes(vLow) || cod.includes(v)) {
+        matches.push({ cod, ...c });
+        if (matches.length >= 20) break;
+      }
+    }
+    renderizarAutocomplete(matches);
+  }, 300);
+}
+
+function renderizarAutocomplete(matches) {
+  const list = document.getElementById('autoList');
+  if (!matches.length) { list.style.display = 'none'; return; }
+  list.innerHTML = matches.map(m =>
+    `<div class="autocomplete-item" onclick="selecionarClienteItem('${m.cod}')">
+      <strong>${m.cod} — ${m.nome}</strong>
+      <span>${m.ramo} | ${m.imbp}</span>
+    </div>`
+  ).join('');
+  list.style.display = 'block';
+}
+
+function selecionarClienteItem(cod) {
+  document.getElementById('inputCliente').value = cod + ' — ' + CLIENTES[cod].nome;
+  document.getElementById('autoList').style.display = 'none';
+  selecionarCliente(cod, CLIENTES[cod]);
+}
+
+function selecionarCliente(cod, c) {
+  clienteAtual = { cod, ...c };
+  document.getElementById('clienteNome').textContent = c.nome;
+  document.getElementById('clienteDetalhes').innerHTML =
+    `<span class="client-badge">${c.ramo}</span>
+     <span class="client-badge">${c.imbp}</span>
+     <span class="client-badge">${c.segmento}</span>`;
+  document.getElementById('clienteInfo').style.display = 'block';
+  document.getElementById('btnProceed1').style.display = 'block';
+}
+
+function navegarLista(e) {
+  // Permite fechar com Escape
+  if (e.key === 'Escape') document.getElementById('autoList').style.display = 'none';
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) document.getElementById('autoList').style.display = 'none';
+});
+
+// ─── TELA 2: PRAZO ───────────────────────────────────────────────────────────
+function renderizarPrazos() {
+  if (typeof AUX === 'undefined') return;
+  const grid = document.getElementById('prazoGrid');
+  const labels = {
+    A1:'À Vista',C0:'C/0',C1:'C/1',C2:'C/2',C3:'C/3',C4:'C/4',C5:'C/5',
+    C6:'C/6',C7:'C/7',E1:'E/1',E2:'E/2',E3:'E/3',E4:'E/4',E5:'E/5',E6:'E/6',
+    L1:'L/1',L2:'L/2',L3:'L/3',L4:'L/4',L5:'L/5',L6:'L/6',
+    S3:'S/3',S4:'S/4',S5:'S/5',S6:'S/6',S7:'S/7',S8:'S/8',S9:'S/9',
+  };
+  grid.innerHTML = Object.entries(AUX).map(([k, v]) => {
+    const pctStr = v >= 0 ? '+' + (v*100).toFixed(1) + '%' : (v*100).toFixed(1) + '%';
+    const isNeg = v < 0;
+    return `<button class="prazo-btn${isNeg?' neg':''}" id="prazo_${k}" onclick="selecionarPrazo('${k}', ${v})">
+      ${labels[k] || k}
+      <span class="pct">${pctStr}</span>
+    </button>`;
+  }).join('');
+}
+
+function selecionarPrazo(cod, val) {
+  prazoAtual = { cod, val };
+  document.querySelectorAll('.prazo-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('prazo_' + cod).classList.add('selected');
+  const desc = val >= 0
+    ? `Acréscimo financeiro de <strong>+${(val*100).toFixed(1)}%</strong>`
+    : `Desconto financeiro de <strong>${(val*100).toFixed(1)}%</strong> sobre o preço de venda`;
+  document.getElementById('prazoDisplay').innerHTML = `Prazo <strong>${cod}</strong> selecionado — ${desc}`;
+  document.getElementById('btnProceed2').style.display = 'block';
+}
+
+// ─── TELA 3: PRODUTOS ────────────────────────────────────────────────────────
+function renderizarResumoTopo() {
+  if (!clienteAtual) return;
+  document.getElementById('resumoNome').textContent = clienteAtual.nome;
+  document.getElementById('resumoDetalhes').innerHTML =
+    `<span class="client-badge">${clienteAtual.ramo}</span>
+     <span class="client-badge">${clienteAtual.imbp}</span>
+     <span class="client-badge">Prazo: ${prazoAtual.cod}</span>`;
+}
+
+function adicionarProduto() {
+  const id = ++produtoIdSeq;
+  produtos.push({ id, cod:'', qtde:'', dpf:'0', preco:'' });
+  renderizarProdutos();
+  // Foca no input de código do produto recém adicionado
+  setTimeout(() => {
+    const el = document.getElementById('pCod_' + id);
+    if (el) el.focus();
+  }, 100);
+}
+
+function removerProduto(id) {
+  produtos = produtos.filter(p => p.id !== id);
+  renderizarProdutos();
+  atualizarTotais();
+}
+
+function renderizarProdutos() {
+  const list = document.getElementById('produtosList');
+  list.innerHTML = produtos.map((p, idx) => criarCardProduto(p, idx+1)).join('');
+}
+
+function criarCardProduto(p, num) {
+  const calc = calcularLinha(p);
+  const nomeExibir = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
+
+  const marginColor = calc.AD != null && !isNaN(calc.AD)
+    ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red')
+    : '';
+
+  return `<div class="produto-card" id="card_${p.id}">
+    <div class="produto-header">
+      <span class="produto-num">#${num}</span>
+      <span class="produto-nome-header">${nomeExibir}</span>
+      <button class="btn-remove" onclick="removerProduto(${p.id})">×</button>
+    </div>
+    <div class="produto-body">
+      <div class="inputs-row">
+        <div class="input-group" style="grid-column:1/-1">
+          <label>CÓD. PRODUTO</label>
+          <input type="text" id="pCod_${p.id}" value="${p.cod}" placeholder="Ex: 123049"
+                 inputmode="numeric"
+                 onchange="atualizarCampo(${p.id},'cod',this.value)"
+                 oninput="atualizarCampo(${p.id},'cod',this.value)">
+        </div>
+        <div class="input-group">
+          <label>QTDE</label>
+          <input type="number" id="pQtde_${p.id}" value="${p.qtde}" placeholder="0"
+                 min="0" step="1" inputmode="decimal"
+                 oninput="atualizarCampo(${p.id},'qtde',this.value)">
+        </div>
+        <div class="input-group">
+          <label>DPF / EMBALAGEM (R$)</label>
+          <input type="number" id="pDpf_${p.id}" value="${p.dpf}" placeholder="0"
+                 min="0" step="0.01" inputmode="decimal"
+                 oninput="atualizarCampo(${p.id},'dpf',this.value)">
+        </div>
+        <div class="input-group" style="grid-column:1/-1">
+          <label>PREÇO VENDA FATURADO (R$ / embalagem)</label>
+          <input type="number" id="pPreco_${p.id}" value="${p.preco}" placeholder="0.00"
+                 min="0" step="0.01" inputmode="decimal"
+                 oninput="atualizarCampo(${p.id},'preco',this.value)">
+        </div>
+      </div>
+
+      <div class="calc-section">
+        <div class="calc-grid">
+          <div class="calc-item">
+            <div class="calc-label">Volume Total</div>
+            <div class="calc-value">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">Custo SPL</div>
+            <div class="calc-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">DPF / Litro</div>
+            <div class="calc-value">${calc.L != null ? fmt.moeda(calc.L) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">DPF Total</div>
+            <div class="calc-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
+          </div>
+        </div>
+
+        <hr class="separator">
+
+        <div class="calc-grid">
+          <div class="calc-item" style="grid-column:1/-1">
+            <div class="calc-label">Lucro Líquido Total (Pós Premier)</div>
+            <div class="calc-value highlight" style="font-size:17px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">Margem Final Pós Premier</div>
+            <div class="calc-value ${marginColor}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">Unitária Final Pós Premier (R$/L)</div>
+            <div class="calc-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function atualizarCampo(id, campo, valor) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  p[campo] = valor;
+  // Re-renderiza apenas o card afetado
+  const card = document.getElementById('card_' + id);
+  if (card) {
+    const num = produtos.indexOf(p) + 1;
+    card.outerHTML = criarCardProduto(p, num);
+  }
+  atualizarTotais();
+}
+
+// ─── CÁLCULOS ────────────────────────────────────────────────────────────────
+function calcularLinha(p) {
+  const prodCod = String(p.cod || '').trim();
+  const qtde    = parseFloat(p.qtde) || 0;
+  const dpfEmb  = parseFloat(p.dpf)  || 0;
+  const preco   = parseFloat(p.preco) || 0;
+
+  if (!prodCod || !clienteAtual) return {};
+
+  const { ramo, imbp, segmento } = clienteAtual;
+  const isConsumo = ramo.includes('CONSUMO') || ramo.startsWith('6');
+
+  // Fator de conversão (litros por embalagem)
+  const fator = parseFloat(CONVERSAO[prodCod]) || 1;
+  const I = qtde * fator;  // Volume Total
+
+  // Nome do produto
+  const nomeProd = NOMES_PRODUTO[prodCod] || null;
+
+  // Custo SPL — lookup com fallback
+  let custoEntry = null;
+  if (isConsumo) {
+    const k1 = prodCod + imbp + ramo;
+    const k2 = prodCod + ramo;
+    custoEntry = CUSTO[k1] || CUSTO[k2] || CUSTO[prodCod];
+  } else {
+    const k1 = prodCod + segmento + imbp + ramo;
+    const k2 = prodCod + ramo;
+    custoEntry = CUSTO[k1] || CUSTO[k2] || CUSTO[prodCod];
+  }
+
+  const J    = custoEntry ? custoEntry.custo : null;
+  const nome = custoEntry ? custoEntry.nome : nomeProd;
+
+  if (J == null) return { nome };
+
+  // DPF
+  const L = fator ? dpfEmb / fator : 0;  // DPF/Litro
+  const M = dpfEmb * qtde;               // DPF Total
+
+  // Custo com DPF
+  const N = J + dpfEmb;   // Novo custo unitário com DPF
+  const O = N * qtde;     // Custo total com DPF
+
+  // Custo líquido pós Premier
+  let premierPct = PREMIER_DEFAULT;
+  if (isConsumo) {
+    const k1 = prodCod + imbp + ramo;
+    const k2 = prodCod + ramo;
+    if (PREMIER[k1] !== undefined) premierPct = PREMIER[k1];
+    else if (PREMIER[k2] !== undefined) premierPct = PREMIER[k2];
+  } else {
+    const k1 = prodCod + segmento + imbp + ramo;
+    const k2 = prodCod + ramo;
+    if (PREMIER[k1] !== undefined) premierPct = PREMIER[k1];
+    else if (PREMIER[k2] !== undefined) premierPct = PREMIER[k2];
+  }
+  const P = N * premierPct * 0.9075 + N * (1 - premierPct);
+  const Q = P * qtde;
+
+  // Preço venda
+  const T = preco * 0.9075;  // Preço líq. imposto
+  const U = preco * qtde;    // Faturamento total
+  const V = T * qtde;        // Faturamento total líq. imposto
+
+  // Lucro e descontos
+  const W = U - O;           // Lucro bruto total
+  const pctFin = prazoAtual ? prazoAtual.val : 0;
+  const X = preco * pctFin;  // Desconto financeiro unitário
+  const Y = X * qtde;        // Desconto financeiro total
+
+  const Z  = W + Y;          // Lucro bruto - financeiro
+  const AA = (V - Q) + Y;   // Lucro líquido total pós Premier
+
+  // Margens (evita divisão por zero)
+  const AB = U  ? Z / U : null;
+  const AC = I  ? Z / I : null;
+  const AD = V  ? ((V + Y) - Q) / V : null;
+  const AE = I  ? AA / I : null;
+
+  return { nome, I, J, L, M, AA, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q };
+}
+
+function atualizarTotais() {
+  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
+
+  for (const p of produtos) {
+    const c = calcularLinha(p);
+    if (c._U != null) {
+      totalI  += c._I  || 0;
+      totalU  += c._U  || 0;
+      totalV  += c._V  || 0;
+      totalY  += c._Y  || 0;
+      totalQ  += c._Q  || 0;
+      totalAA += c._AA || 0;
+      linhasValidas++;
+    }
+  }
+
+  const card = document.getElementById('totalsCard');
+  if (!linhasValidas) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const totMargemAD = totalV ? ((totalV + totalY) - totalQ) / totalV : null;
+  const totUnitAE   = totalI ? totalAA / totalI : null;
+
+  document.getElementById('totVolume').textContent     = fmt.vol(totalI);
+  document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
+  document.getElementById('totLucro').textContent      = fmt.moeda(totalAA);
+  document.getElementById('totMargem').textContent     = fmt.pct(totMargemAD);
+  document.getElementById('totUnitaria').textContent   = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
+}
+</script>
+</body>
+</html>
