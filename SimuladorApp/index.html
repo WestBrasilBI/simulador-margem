@@ -378,7 +378,7 @@
 <header>
   <div class="header-row">
     <div>
-      <div class="logo">WEST<span>.</span>BRASIL</div>
+      <div class="logo">WEST<span>.</span>BI</div>
       <div class="subtitle">Simulador de Margem Unitária</div>
     </div>
     <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
@@ -487,7 +487,7 @@ if ('serviceWorker' in navigator) {
 // ─── ESTADO ───────────────────────────────────────────────────────────────────
 let clienteAtual = null;
 let prazoAtual   = null;
-let produtos     = [];    // array de objetos { id, cod, qtde, dpf, preco }
+let produtos     = [];
 let produtoIdSeq = 0;
 
 // ─── FORMATAÇÃO ──────────────────────────────────────────────────────────────
@@ -569,7 +569,6 @@ function buscaCliente(val) {
   const v = val.trim();
   if (!v) { document.getElementById('autoList').style.display = 'none'; return; }
 
-  // Busca exata por código numérico
   if (/^\d+$/.test(v) && CLIENTES[v]) {
     selecionarCliente(v, CLIENTES[v]);
     document.getElementById('autoList').style.display = 'none';
@@ -620,7 +619,6 @@ function selecionarCliente(cod, c) {
 }
 
 function navegarLista(e) {
-  // Permite fechar com Escape
   if (e.key === 'Escape') document.getElementById('autoList').style.display = 'none';
 }
 
@@ -673,7 +671,7 @@ function adicionarProduto() {
   const id = ++produtoIdSeq;
   produtos.push({ id, cod:'', qtde:'', dpf:'0', preco:'' });
   renderizarProdutos();
-  // Foca no input de código do produto recém adicionado
+  atualizarTotais();
   setTimeout(() => {
     const el = document.getElementById('pCod_' + id);
     if (el) el.focus();
@@ -778,8 +776,10 @@ function atualizarCampo(id, campo, valor) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
   p[campo] = valor;
-  atualizarDisplayCard(id);
-  atualizarTotais();
+  requestAnimationFrame(() => {
+    atualizarDisplayCard(id);
+    atualizarTotais();
+  });
 }
 
 function atualizarDisplayCard(id) {
@@ -787,11 +787,9 @@ function atualizarDisplayCard(id) {
   if (!p) return;
   const calc = calcularLinha(p);
 
-  // Atualiza nome no cabeçalho do card
   const nomeEl = document.getElementById('pNome_' + id);
   if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
 
-  // Atualiza somente os campos calculados (sem tocar nos inputs)
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
   set('pVolTotal_'  + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
   set('pCustoSpl_'  + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
@@ -822,14 +820,11 @@ function calcularLinha(p) {
   const { ramo, imbp, segmento } = clienteAtual;
   const isConsumo = ramo.includes('CONSUMO') || ramo.startsWith('6');
 
-  // Fator de conversão (litros por embalagem)
   const fator = parseFloat(CONVERSAO[prodCod]) || 1;
-  const I = qtde * fator;  // Volume Total
+  const I = qtde * fator;
 
-  // Nome do produto
   const nomeProd = NOMES_PRODUTO[prodCod] || null;
 
-  // Custo SPL — lookup com fallback
   let custoEntry = null;
   if (isConsumo) {
     const k1 = prodCod + imbp + ramo;
@@ -846,15 +841,12 @@ function calcularLinha(p) {
 
   if (J == null) return { nome };
 
-  // DPF
-  const L = fator ? dpfEmb / fator : 0;  // DPF/Litro
-  const M = dpfEmb * qtde;               // DPF Total
+  const L = fator ? dpfEmb / fator : 0;
+  const M = dpfEmb * qtde;
 
-  // Custo com DPF
-  const N = J + dpfEmb;   // Novo custo unitário com DPF
-  const O = N * qtde;     // Custo total com DPF
+  const N = J + dpfEmb;
+  const O = N * qtde;
 
-  // Custo líquido pós Premier
   let premierPct = PREMIER_DEFAULT;
   if (isConsumo) {
     const k1 = prodCod + imbp + ramo;
@@ -870,21 +862,18 @@ function calcularLinha(p) {
   const P = N * premierPct * 0.9075 + N * (1 - premierPct);
   const Q = P * qtde;
 
-  // Preço venda
-  const T = preco * 0.9075;  // Preço líq. imposto
-  const U = preco * qtde;    // Faturamento total
-  const V = T * qtde;        // Faturamento total líq. imposto
+  const T = preco * 0.9075;
+  const U = preco * qtde;
+  const V = T * qtde;
 
-  // Lucro e descontos
-  const W = U - O;           // Lucro bruto total
+  const W = U - O;
   const pctFin = prazoAtual ? prazoAtual.val : 0;
-  const X = preco * pctFin;  // Desconto financeiro unitário
-  const Y = X * qtde;        // Desconto financeiro total
+  const X = preco * pctFin;
+  const Y = X * qtde;
 
-  const Z  = W + Y;          // Lucro bruto - financeiro
-  const AA = (V - Q) + Y;   // Lucro líquido total pós Premier
+  const Z  = W + Y;
+  const AA = (V - Q) + Y;
 
-  // Margens (evita divisão por zero)
   const AB = U  ? Z / U : null;
   const AC = I  ? Z / I : null;
   const AD = V  ? ((V + Y) - Q) / V : null;
@@ -894,11 +883,19 @@ function calcularLinha(p) {
 }
 
 function atualizarTotais() {
+  const card = document.getElementById('totalsCard');
+
+  if (produtos.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+
   let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
 
   for (const p of produtos) {
     const c = calcularLinha(p);
-    if (c._U != null) {
+    if (c._U) {
       totalI  += c._I  || 0;
       totalU  += c._U  || 0;
       totalV  += c._V  || 0;
@@ -909,18 +906,23 @@ function atualizarTotais() {
     }
   }
 
-  const card = document.getElementById('totalsCard');
-  if (!linhasValidas) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
+  if (!linhasValidas) {
+    document.getElementById('totVolume').textContent      = '—';
+    document.getElementById('totFaturamento').textContent = '—';
+    document.getElementById('totLucro').textContent       = '—';
+    document.getElementById('totMargem').textContent      = '—';
+    document.getElementById('totUnitaria').textContent    = '—';
+    return;
+  }
 
   const totMargemAD = totalV ? ((totalV + totalY) - totalQ) / totalV : null;
   const totUnitAE   = totalI ? totalAA / totalI : null;
 
-  document.getElementById('totVolume').textContent     = fmt.vol(totalI);
+  document.getElementById('totVolume').textContent      = fmt.vol(totalI);
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
-  document.getElementById('totLucro').textContent      = fmt.moeda(totalAA);
-  document.getElementById('totMargem').textContent     = fmt.pct(totMargemAD);
-  document.getElementById('totUnitaria').textContent   = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
+  document.getElementById('totLucro').textContent       = fmt.moeda(totalAA);
+  document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
+  document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
 </script>
 </body>
