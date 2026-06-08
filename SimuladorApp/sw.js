@@ -1,4 +1,4 @@
-const CACHE = 'simulador-mg-v1';
+const CACHE = 'simulador-mg-v2';
 const ASSETS = ['./', './index.html', './data/data.js'];
 
 self.addEventListener('install', e => {
