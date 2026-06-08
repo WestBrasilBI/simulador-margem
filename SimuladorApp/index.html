@@ -325,10 +325,6 @@
         <div class="total-value" id="totFaturamento">—</div>
       </div>
       <div class="total-item">
-        <div class="total-label">Lucro Líq. Pós Premier</div>
-        <div class="total-value accent" id="totLucro">—</div>
-      </div>
-      <div class="total-item">
         <div class="total-label">Margem Final</div>
         <div class="total-value accent" id="totMargem">—</div>
       </div>
@@ -585,10 +581,6 @@ function criarCardProduto(p, num) {
         </div>
         <hr class="separator">
         <div class="calc-grid">
-          <div class="calc-item" style="grid-column:1/-1">
-            <div class="calc-label">Lucro Líquido Total (Pós Premier)</div>
-            <div class="calc-value highlight" id="pLucro_${p.id}" style="font-size:17px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
-          </div>
           <div class="calc-item">
             <div class="calc-label">Margem Final Pós Premier</div>
             <div class="calc-value ${marginColor}" id="pMargem_${p.id}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
@@ -621,7 +613,6 @@ function atualizarDisplayCard(id) {
   set('pCustoSpl_' + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
   set('pDpfLitro_' + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
   set('pDpfTotal_' + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
-  set('pLucro_'    + id, calc.AA != null ? fmt.moeda(calc.AA): '—');
   set('pUnitaria_' + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
@@ -697,14 +688,13 @@ function atualizarTotais() {
   card.style.display = 'block';
   const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
   if (!linhasValidas) {
-    ['totVolume','totFaturamento','totLucro','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    ['totVolume','totFaturamento','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
   }
   const totMargemAD = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
   const totUnitAE   = totalI ? totalAA/totalI : null;
   document.getElementById('totVolume').textContent      = fmt.vol(totalI);
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
-  document.getElementById('totLucro').textContent       = fmt.moeda(totalAA);
   document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
@@ -732,7 +722,6 @@ function gerarExport() {
           <div><div class="exp-field-label">DPF / Emb.</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
           <div><div class="exp-field-label">DPF Total</div><div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
-          <div style="grid-column:1/-1"><div class="exp-field-label">Lucro Líquido Pós Premier</div><div class="exp-field-value blue" style="font-size:13px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div></div>
           <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}" style="font-size:13px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
           <div><div class="exp-field-label">Unitária Final (R$/L)</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
         </div>
@@ -750,7 +739,6 @@ function gerarExport() {
         <div class="exp-totals-grid">
           <div><div class="exp-total-label">Volume Total</div><div class="exp-total-value">${fmt.vol(totalI)}</div></div>
           <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
-          <div><div class="exp-total-label">Lucro Líq. Pós Premier</div><div class="exp-total-value accent">${fmt.moeda(totalAA)}</div></div>
           <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totMargem)}</div></div>
           <div class="exp-full"><div class="exp-total-label">Unitária Final Pós Premier</div><div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}</div></div>
         </div>
