@@ -44,13 +44,13 @@
   .logo-wrap {
     background: white;
     border-radius: 7px;
-    padding: 5px 10px;
+    padding: 5px 12px;
     display: flex;
     align-items: center;
     flex-shrink: 0;
   }
-  .logo-wrap img { height: 30px; display: block; }
-  .subtitle { font-size: 11px; opacity: 0.75; flex: 1; }
+  .logo-text { font-weight: 800; font-size: 16px; color: var(--blue); letter-spacing: -0.5px; }
+  .subtitle { font-size: 11px; opacity: 0.75; flex: 1; margin-left: 10px; }
   .btn-reset {
     margin-left: auto;
     background: rgba(255,255,255,0.15);
@@ -65,19 +65,8 @@
   }
 
   /* STEPS BAR */
-  .steps-bar {
-    background: var(--blue);
-    padding: 0 16px 12px;
-    display: flex;
-    gap: 6px;
-  }
-  .step-dot {
-    flex: 1;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.25);
-    transition: background 0.3s;
-  }
+  .steps-bar { background: var(--blue); padding: 0 16px 12px; display: flex; gap: 6px; }
+  .step-dot { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25); transition: background 0.3s; }
   .step-dot.active { background: var(--white); }
   .step-dot.done { background: rgba(255,255,255,0.55); }
 
@@ -86,61 +75,27 @@
   .screen.active { display: block; }
 
   /* CARDS */
-  .card {
-    background: var(--white);
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 12px;
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--blue);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 14px;
-  }
+  .card { background: var(--white); border-radius: 14px; padding: 20px; box-shadow: var(--card-shadow); margin-bottom: 12px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
 
   /* FORM ELEMENTS */
   label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-text); margin-bottom: 5px; }
   input[type=text], input[type=number], select {
-    width: 100%;
-    border: 1.5px solid var(--gray-border);
-    border-radius: 8px;
-    padding: 11px 12px;
-    font-size: 15px;
-    color: var(--text);
-    background: var(--white);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
+    width: 100%; border: 1.5px solid var(--gray-border); border-radius: 8px;
+    padding: 11px 12px; font-size: 15px; color: var(--text); background: var(--white);
+    outline: none; transition: border-color 0.2s; -webkit-appearance: none;
   }
   input:focus, select:focus { border-color: var(--blue); }
   input.error { border-color: var(--red); }
-  .field-hint { font-size: 11px; color: var(--gray-text); margin-top: 4px; }
 
   /* CLIENT SEARCH */
   .search-wrap { position: relative; }
   .autocomplete-list {
-    position: absolute;
-    top: 100%;
-    left: 0; right: 0;
-    background: white;
-    border: 1.5px solid var(--blue);
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    max-height: 220px;
-    overflow-y: auto;
-    z-index: 50;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    position: absolute; top: 100%; left: 0; right: 0; background: white;
+    border: 1.5px solid var(--blue); border-top: none; border-radius: 0 0 10px 10px;
+    max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
   }
-  .autocomplete-item {
-    padding: 11px 14px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--gray-border);
-    font-size: 13px;
-  }
+  .autocomplete-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid var(--gray-border); font-size: 13px; }
   .autocomplete-item:last-child { border-bottom: none; }
   .autocomplete-item:hover, .autocomplete-item:active { background: var(--gray-bg); }
   .autocomplete-item strong { display: block; color: var(--blue); font-weight: 700; }
@@ -149,42 +104,18 @@
   /* CLIENT INFO BOX */
   .client-info {
     background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
-    color: white;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
+    color: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
   }
   .client-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
   .client-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
-  .client-badge {
-    background: rgba(255,255,255,0.15);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 11px;
-    font-weight: 600;
-  }
+  .client-badge { background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
 
   /* PRAZO GRID */
-  .prazo-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
+  .prazo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .prazo-btn {
-    border: 1.5px solid var(--gray-border);
-    border-radius: 8px;
-    padding: 10px 4px;
-    text-align: center;
-    cursor: pointer;
-    background: white;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    transition: all 0.15s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
+    border: 1.5px solid var(--gray-border); border-radius: 8px; padding: 10px 4px;
+    text-align: center; cursor: pointer; background: white; font-size: 13px; font-weight: 600;
+    color: var(--text); transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px;
   }
   .prazo-btn .pct { font-size: 10px; font-weight: 400; color: var(--gray-text); }
   .prazo-btn.selected { border-color: var(--blue); background: var(--blue); color: white; }
@@ -193,67 +124,16 @@
   .prazo-btn.selected.neg .pct { color: rgba(255,255,255,0.7); }
 
   /* PRODUCT CARDS */
-  .produto-card {
-    background: var(--white);
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 10px;
-    overflow: hidden;
-    border: 1.5px solid var(--gray-border);
-  }
-  .produto-header {
-    background: var(--blue);
-    color: white;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .produto-num {
-    background: rgba(255,255,255,0.2);
-    border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .produto-nome-header {
-    font-size: 13px;
-    font-weight: 600;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .btn-remove {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    border-radius: 6px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-  }
+  .produto-card { background: var(--white); border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 10px; overflow: hidden; border: 1.5px solid var(--gray-border); }
+  .produto-header { background: var(--blue); color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .produto-num { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .produto-nome-header { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .btn-remove { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 16px; line-height: 1; }
   .produto-body { padding: 14px; }
-  .inputs-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
+  .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
   .input-group label { font-size: 11px; font-weight: 600; color: var(--gray-text); margin-bottom: 4px; }
-  .input-group input {
-    width: 100%;
-    border: 1.5px solid var(--gray-border);
-    border-radius: 7px;
-    padding: 9px 10px;
-    font-size: 14px;
-    background: var(--white);
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .input-group input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: 7px; padding: 9px 10px; font-size: 14px; background: var(--white); outline: none; transition: border-color 0.2s; }
   .input-group input:focus { border-color: var(--blue); }
-
   .calc-section { background: var(--gray-bg); border-radius: 8px; padding: 12px; }
   .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; }
@@ -264,13 +144,7 @@
   .separator { border: none; border-top: 1px solid var(--gray-border); margin: 10px 0; }
 
   /* TOTALS */
-  .totals-card {
-    background: var(--blue);
-    color: white;
-    border-radius: 14px;
-    padding: 18px;
-    margin-top: 4px;
-  }
+  .totals-card { background: var(--blue); color: white; border-radius: 14px; padding: 18px; margin-top: 4px; }
   .totals-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; opacity: 0.8; }
   .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .total-label { font-size: 10px; font-weight: 600; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.3px; }
@@ -279,222 +153,101 @@
   .total-item.full { grid-column: 1 / -1; }
 
   /* BUTTONS */
-  .btn-primary {
-    width: 100%;
-    background: var(--blue);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.2s;
-  }
+  .btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
   .btn-primary:hover { background: var(--blue-light); }
-  .btn-secondary {
-    width: 100%;
-    background: transparent;
-    color: var(--blue);
-    border: 1.5px solid var(--blue);
-    border-radius: 10px;
-    padding: 13px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-  .btn-add {
-    width: 100%;
-    background: white;
-    color: var(--blue);
-    border: 2px dashed var(--blue);
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background 0.15s;
-  }
+  .btn-secondary { width: 100%; background: transparent; color: var(--blue); border: 1.5px solid var(--blue); border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .btn-add { width: 100%; background: white; color: var(--blue); border: 2px dashed var(--blue); border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; }
   .btn-add:active { background: var(--gray-bg); }
   .btn-add-icon { font-size: 22px; font-weight: 400; }
-  .btn-export {
-    width: 100%;
-    background: var(--red);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
+  .btn-export { width: 100%; background: var(--red); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
   /* ALERTS */
-  .alert {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #7c5700;
-    margin-bottom: 10px;
-  }
+  .alert { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #7c5700; margin-bottom: 10px; }
   .alert.error { background: #fdecea; border-color: var(--red); color: #9b1a20; }
 
   /* VERSION */
   .version-tag { text-align: center; font-size: 11px; color: var(--gray-text); padding: 12px; }
 
-  /* PRAZO SELECTED DISPLAY */
-  .prazo-display {
-    background: var(--gray-bg);
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--gray-text);
-  }
+  /* PRAZO DISPLAY */
+  .prazo-display { background: var(--gray-bg); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--gray-text); }
   .prazo-display strong { color: var(--text); }
 
-  /* ── EXPORT OVERLAY ────────────────────────────────────────── */
+  /* EXPORT OVERLAY */
   #exportOverlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: #f0f2f5;
-    z-index: 300;
-    overflow-y: auto;
-    padding: 16px 16px 100px;
-  }
-  #exportDoc {
     background: white;
-    border-radius: 14px;
-    padding: 20px;
-    max-width: 560px;
-    margin: 0 auto;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    z-index: 300;
+    flex-direction: column;
   }
+  #exportOverlay.visible { display: flex; }
+
+  #exportDocWrap {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 8px 8px 0;
+  }
+
+  #exportDoc {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    transform-origin: top center;
+  }
+
   .exp-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 14px;
+    padding-bottom: 10px;
     border-bottom: 2px solid var(--blue);
-    margin-bottom: 14px;
-  }
-  .exp-header img { height: 38px; }
-  .exp-header-right { text-align: right; }
-  .exp-header-right .exp-title { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
-  .exp-header-right .exp-date { font-size: 11px; color: var(--gray-text); margin-top: 2px; }
-  .exp-client {
-    background: var(--gray-bg);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 14px;
-  }
-  .exp-client-nome { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .exp-client-info { font-size: 12px; color: var(--gray-text); margin-bottom: 6px; }
-  .exp-prazo-badge {
-    display: inline-block;
-    background: var(--blue);
-    color: white;
-    border-radius: 5px;
-    padding: 2px 10px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .exp-product {
-    border: 1.5px solid var(--gray-border);
-    border-radius: 10px;
     margin-bottom: 10px;
-    overflow: hidden;
-    page-break-inside: avoid;
   }
-  .exp-product-hdr {
-    background: var(--blue);
-    color: white;
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .exp-product-body {
-    padding: 10px 12px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .exp-field-label { font-size: 10px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
-  .exp-field-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .exp-logo { font-weight: 800; font-size: 15px; color: var(--blue); }
+  .exp-header-right { text-align: right; }
+  .exp-title { font-size: 10px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
+  .exp-date { font-size: 10px; color: var(--gray-text); margin-top: 1px; }
+
+  .exp-client { background: var(--gray-bg); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+  .exp-client-nome { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .exp-client-info { font-size: 10px; color: var(--gray-text); margin-bottom: 4px; }
+  .exp-prazo-badge { display: inline-block; background: var(--blue); color: white; border-radius: 4px; padding: 1px 8px; font-size: 10px; font-weight: 700; }
+
+  .exp-product { border: 1px solid var(--gray-border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+  .exp-product-hdr { background: var(--blue); color: white; padding: 5px 10px; font-size: 10px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-product-body { padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .exp-field-label { font-size: 8px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
+  .exp-field-value { font-size: 11px; font-weight: 600; color: var(--text); }
   .exp-field-value.green { color: var(--green); }
   .exp-field-value.red { color: var(--red); }
   .exp-field-value.blue { color: var(--blue); }
-  .exp-totals {
-    background: var(--blue);
-    color: white;
-    border-radius: 10px;
-    padding: 14px;
-    margin-top: 4px;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .exp-totals-title { font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 12px; letter-spacing: 0.5px; }
-  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .exp-total-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
-  .exp-total-value { font-size: 16px; font-weight: 700; margin-top: 2px; }
+
+  .exp-totals { background: var(--blue); color: white; border-radius: 8px; padding: 10px; margin-top: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-totals-title { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .exp-total-label { font-size: 8px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
+  .exp-total-value { font-size: 13px; font-weight: 700; margin-top: 1px; }
   .exp-total-value.accent { color: #ffd166; }
   .exp-full { grid-column: 1/-1; }
-  .exp-footer { font-size: 10px; color: var(--gray-text); text-align: center; margin-top: 14px; }
 
-  .export-actions {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
+  .exp-footer { font-size: 8px; color: var(--gray-text); text-align: center; margin-top: 8px; }
+
+  .export-bar {
     background: white;
     border-top: 1px solid var(--gray-border);
-    padding: 12px 16px;
+    padding: 10px 16px;
     display: flex;
-    gap: 8px;
-    z-index: 301;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
   }
-  .export-actions button {
-    flex: 1;
-    border: none;
-    border-radius: 10px;
-    padding: 13px 8px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .btn-exp-print { background: var(--blue); color: white; }
-  .btn-exp-share { background: #25D366; color: white; }
-  .btn-exp-close { background: var(--gray-bg); color: var(--text); }
-
-  /* PRINT */
-  @media print {
-    body * { visibility: hidden; }
-    #exportOverlay, #exportOverlay * { visibility: visible; }
-    #exportOverlay {
-      position: absolute !important;
-      top: 0; left: 0;
-      background: white !important;
-      padding: 0 !important;
-      display: block !important;
-    }
-    .export-actions { display: none !important; }
-    #exportDoc { box-shadow: none !important; border-radius: 0 !important; }
-  }
+  .export-bar-hint { font-size: 12px; color: var(--gray-text); }
+  .export-bar-hint strong { color: var(--text); }
+  .btn-fechar { background: var(--gray-bg); border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -502,9 +255,9 @@
 <header>
   <div class="header-row">
     <div class="logo-wrap">
-      <img src="logo-west.png" alt="West Brasil" onerror="this.parentNode.innerHTML='<span style=\'font-weight:800;font-size:16px;color:#0c4976\'>West Brasil</span>'">
+      <span class="logo-text">West Brasil</span>
     </div>
-    <div class="subtitle" style="margin-left:10px;">Simulador de Margem Unitária</div>
+    <div class="subtitle">Simulador de Margem Unitária</div>
     <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
   </div>
   <div class="steps-bar" id="stepsBar">
@@ -514,7 +267,7 @@
   </div>
 </header>
 
-<!-- ═══════════════ TELA 1: CLIENTE ═══════════════ -->
+<!-- TELA 1: CLIENTE -->
 <div class="screen active" id="screen1">
   <div class="card">
     <div class="card-title">1. Identificação do Cliente</div>
@@ -522,8 +275,7 @@
       <label for="inputCliente">Código ou nome do cliente</label>
       <input type="text" id="inputCliente" placeholder="Ex: 3657 ou G-KT Brasil..."
              autocomplete="off" inputmode="text"
-             oninput="buscaCliente(this.value)"
-             onkeydown="navegarLista(event)">
+             oninput="buscaCliente(this.value)" onkeydown="navegarLista(event)">
       <div class="autocomplete-list" id="autoList" style="display:none"></div>
     </div>
     <div id="clienteInfo" style="display:none; margin-top:14px;">
@@ -542,7 +294,7 @@
   <div class="version-tag" id="versionTag">Carregando dados...</div>
 </div>
 
-<!-- ═══════════════ TELA 2: PRAZO ═══════════════ -->
+<!-- TELA 2: PRAZO -->
 <div class="screen" id="screen2">
   <div class="card">
     <div class="card-title">2. Prazo de Pagamento</div>
@@ -555,7 +307,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ TELA 3: PRODUTOS ═══════════════ -->
+<!-- TELA 3: PRODUTOS -->
 <div class="screen" id="screen3">
   <div class="client-info" id="resumoClienteTopo" style="margin-bottom:12px;">
     <h3 id="resumoNome"></h3>
@@ -598,13 +350,14 @@
   <button class="btn-secondary" style="margin-top:8px;" onclick="irParaTela2()">← Alterar Prazo</button>
 </div>
 
-<!-- ═══════════════ EXPORT OVERLAY ═══════════════ -->
+<!-- EXPORT OVERLAY -->
 <div id="exportOverlay">
-  <div id="exportDoc"></div>
-  <div class="export-actions">
-    <button class="btn-exp-print" onclick="window.print()">🖨 PDF</button>
-    <button class="btn-exp-share" id="btnShare" onclick="compartilharTexto()" style="display:none">📤 WhatsApp</button>
-    <button class="btn-exp-close" onclick="fecharExport()">✕ Fechar</button>
+  <div id="exportDocWrap">
+    <div id="exportDoc"></div>
+  </div>
+  <div class="export-bar">
+    <div class="export-bar-hint">📸 Tire um <strong>print</strong> da tela</div>
+    <button class="btn-fechar" onclick="fecharExport()">✕ Fechar</button>
   </div>
 </div>
 
@@ -615,13 +368,11 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
-// ─── ESTADO ───────────────────────────────────────────────────────────────────
 let clienteAtual = null;
 let prazoAtual   = null;
 let produtos     = [];
 let produtoIdSeq = 0;
 
-// ─── FORMATAÇÃO ──────────────────────────────────────────────────────────────
 const fmt = {
   moeda: v => v == null || isNaN(v) ? '—' : 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
   pct:   v => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1) + '%',
@@ -629,20 +380,17 @@ const fmt = {
   num:   v => v == null || isNaN(v) ? '—' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
 };
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   try {
     const tag = document.getElementById('versionTag');
     if (typeof DATA_VERSION !== 'undefined') tag.textContent = 'Dados de: ' + DATA_VERSION;
     else tag.textContent = 'Dados carregados';
     renderizarPrazos();
-    if (navigator.share) document.getElementById('btnShare').style.display = 'flex';
   } catch(e) {
     document.getElementById('versionTag').textContent = 'Erro ao carregar dados';
   }
 });
 
-// ─── NAVEGAÇÃO ───────────────────────────────────────────────────────────────
 function setScreen(n) {
   document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i+1 === n));
   ['dot1','dot2','dot3'].forEach((id,i) => {
@@ -653,11 +401,7 @@ function setScreen(n) {
 }
 
 function irParaTela1() { setScreen(1); }
-
-function irParaTela2() {
-  if (!clienteAtual) return;
-  setScreen(2);
-}
+function irParaTela2() { if (!clienteAtual) return; setScreen(2); }
 
 function irParaTela3() {
   if (!prazoAtual) return;
@@ -672,10 +416,7 @@ function irParaTela3() {
 }
 
 function resetAll() {
-  clienteAtual = null;
-  prazoAtual = null;
-  produtos = [];
-  produtoIdSeq = 0;
+  clienteAtual = null; prazoAtual = null; produtos = []; produtoIdSeq = 0;
   document.getElementById('inputCliente').value = '';
   document.getElementById('clienteInfo').style.display = 'none';
   document.getElementById('clienteErro').style.display = 'none';
@@ -689,7 +430,6 @@ function resetAll() {
   setScreen(1);
 }
 
-// ─── TELA 1: CLIENTE ─────────────────────────────────────────────────────────
 let searchTimer = null;
 function buscaCliente(val) {
   clearTimeout(searchTimer);
@@ -697,16 +437,13 @@ function buscaCliente(val) {
   document.getElementById('clienteInfo').style.display = 'none';
   document.getElementById('btnProceed1').style.display = 'none';
   clienteAtual = null;
-
   const v = val.trim();
   if (!v) { document.getElementById('autoList').style.display = 'none'; return; }
-
   if (/^\d+$/.test(v) && CLIENTES[v]) {
     selecionarCliente(v, CLIENTES[v]);
     document.getElementById('autoList').style.display = 'none';
     return;
   }
-
   searchTimer = setTimeout(() => {
     if (v.length < 3) { document.getElementById('autoList').style.display = 'none'; return; }
     const vLow = v.toLowerCase();
@@ -753,12 +490,10 @@ function selecionarCliente(cod, c) {
 function navegarLista(e) {
   if (e.key === 'Escape') document.getElementById('autoList').style.display = 'none';
 }
-
 document.addEventListener('click', e => {
   if (!e.target.closest('.search-wrap')) document.getElementById('autoList').style.display = 'none';
 });
 
-// ─── TELA 2: PRAZO ───────────────────────────────────────────────────────────
 function renderizarPrazos() {
   if (typeof AUX === 'undefined') return;
   const grid = document.getElementById('prazoGrid');
@@ -772,8 +507,7 @@ function renderizarPrazos() {
     const pctStr = v >= 0 ? '+' + (v*100).toFixed(1) + '%' : (v*100).toFixed(1) + '%';
     const isNeg = v < 0;
     return `<button class="prazo-btn${isNeg?' neg':''}" id="prazo_${k}" onclick="selecionarPrazo('${k}', ${v})">
-      ${labels[k] || k}
-      <span class="pct">${pctStr}</span>
+      ${labels[k] || k}<span class="pct">${pctStr}</span>
     </button>`;
   }).join('');
 }
@@ -789,7 +523,6 @@ function selecionarPrazo(cod, val) {
   document.getElementById('btnProceed2').style.display = 'block';
 }
 
-// ─── TELA 3: PRODUTOS ────────────────────────────────────────────────────────
 function renderizarResumoTopo() {
   if (!clienteAtual) return;
   document.getElementById('resumoNome').textContent = clienteAtual.nome;
@@ -804,10 +537,7 @@ function adicionarProduto() {
   produtos.push({ id, cod:'', qtde:'', dpf:'0', preco:'' });
   renderizarProdutos();
   atualizarTotais();
-  setTimeout(() => {
-    const el = document.getElementById('pCod_' + id);
-    if (el) el.focus();
-  }, 100);
+  setTimeout(() => { const el = document.getElementById('pCod_' + id); if (el) el.focus(); }, 100);
 }
 
 function removerProduto(id) {
@@ -817,16 +547,13 @@ function removerProduto(id) {
 }
 
 function renderizarProdutos() {
-  const list = document.getElementById('produtosList');
-  list.innerHTML = produtos.map((p, idx) => criarCardProduto(p, idx+1)).join('');
+  document.getElementById('produtosList').innerHTML = produtos.map((p, idx) => criarCardProduto(p, idx+1)).join('');
 }
 
 function criarCardProduto(p, num) {
   const calc = calcularLinha(p);
   const nomeExibir = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
-  const marginColor = calc.AD != null && !isNaN(calc.AD)
-    ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red') : '';
-
+  const marginColor = calc.AD != null && !isNaN(calc.AD) ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red') : '';
   return `<div class="produto-card" id="card_${p.id}">
     <div class="produto-header">
       <span class="produto-num">#${num}</span>
@@ -858,22 +585,10 @@ function criarCardProduto(p, num) {
       </div>
       <div class="calc-section">
         <div class="calc-grid">
-          <div class="calc-item">
-            <div class="calc-label">Volume Total</div>
-            <div class="calc-value" id="pVolTotal_${p.id}">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">Custo SPL</div>
-            <div class="calc-value" id="pCustoSpl_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">DPF / Litro</div>
-            <div class="calc-value" id="pDpfLitro_${p.id}">${calc.L != null ? fmt.moeda(calc.L) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">DPF Total</div>
-            <div class="calc-value" id="pDpfTotal_${p.id}">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
-          </div>
+          <div class="calc-item"><div class="calc-label">Volume Total</div><div class="calc-value" id="pVolTotal_${p.id}">${calc.I != null ? fmt.vol(calc.I) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">Custo SPL</div><div class="calc-value" id="pCustoSpl_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">DPF / Litro</div><div class="calc-value" id="pDpfLitro_${p.id}">${calc.L != null ? fmt.moeda(calc.L) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">DPF Total</div><div class="calc-value" id="pDpfTotal_${p.id}">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
         </div>
         <hr class="separator">
         <div class="calc-grid">
@@ -899,20 +614,15 @@ function atualizarCampo(id, campo, valor) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
   p[campo] = valor;
-  requestAnimationFrame(() => {
-    atualizarDisplayCard(id);
-    atualizarTotais();
-  });
+  requestAnimationFrame(() => { atualizarDisplayCard(id); atualizarTotais(); });
 }
 
 function atualizarDisplayCard(id) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
   const calc = calcularLinha(p);
-
   const nomeEl = document.getElementById('pNome_' + id);
   if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
-
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
   set('pVolTotal_' + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
   set('pCustoSpl_' + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
@@ -920,29 +630,23 @@ function atualizarDisplayCard(id) {
   set('pDpfTotal_' + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
   set('pLucro_'    + id, calc.AA != null ? fmt.moeda(calc.AA): '—');
   set('pUnitaria_' + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
-
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
     margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
-    margemEl.className = 'calc-value ' + (
-      calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red'
-    );
+    margemEl.className = 'calc-value ' + (calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red');
     margemEl.style.fontSize = '16px';
   }
 }
 
-// ─── CÁLCULOS ────────────────────────────────────────────────────────────────
 function calcularLinha(p) {
   const prodCod = String(p.cod || '').trim();
   const qtde    = parseFloat(p.qtde) || 0;
   const dpfEmb  = parseFloat(p.dpf)  || 0;
   const preco   = parseFloat(p.preco) || 0;
-
   if (!prodCod || !clienteAtual) return {};
 
   const { ramo, imbp, segmento } = clienteAtual;
   const isConsumo = ramo.includes('CONSUMO') || ramo.startsWith('6');
-
   const fator = parseFloat(CONVERSAO[prodCod]) || 1;
   const I = qtde * fator;
   const nomeProd = NOMES_PRODUTO[prodCod] || null;
@@ -953,7 +657,6 @@ function calcularLinha(p) {
   } else {
     custoEntry = CUSTO[prodCod+segmento+imbp+ramo] || CUSTO[prodCod+ramo] || CUSTO[prodCod];
   }
-
   const J    = custoEntry ? custoEntry.custo : null;
   const nome = custoEntry ? custoEntry.nome  : nomeProd;
   if (J == null) return { nome };
@@ -971,9 +674,8 @@ function calcularLinha(p) {
     if (PREMIER[prodCod+segmento+imbp+ramo] !== undefined) premierPct = PREMIER[prodCod+segmento+imbp+ramo];
     else if (PREMIER[prodCod+ramo] !== undefined) premierPct = PREMIER[prodCod+ramo];
   }
-  const P = N * premierPct * 0.9075 + N * (1 - premierPct);
-  const Q = P * qtde;
-
+  const P  = N * premierPct * 0.9075 + N * (1 - premierPct);
+  const Q  = P * qtde;
   const T  = preco * 0.9075;
   const U  = preco * qtde;
   const V  = T * qtde;
@@ -981,11 +683,9 @@ function calcularLinha(p) {
   const pctFin = prazoAtual ? prazoAtual.val : 0;
   const X  = preco * pctFin;
   const Y  = X * qtde;
-  const Z  = W + Y;
   const AA = (V - Q) + Y;
-  const AD = V  ? ((V + Y) - Q) / V : null;
-  const AE = I  ? AA / I : null;
-
+  const AD = V ? ((V + Y) - Q) / V : null;
+  const AE = I ? AA / I : null;
   return { nome, I, J, L, M, AA, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q };
 }
 
@@ -993,11 +693,7 @@ function calcularTotais() {
   let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
   for (const p of produtos) {
     const c = calcularLinha(p);
-    if (c._U) {
-      totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0;
-      totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0;
-      linhasValidas++;
-    }
+    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; linhasValidas++; }
   }
   return { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas };
 }
@@ -1006,19 +702,13 @@ function atualizarTotais() {
   const card = document.getElementById('totalsCard');
   if (produtos.length === 0) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-
   const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
-
   if (!linhasValidas) {
-    ['totVolume','totFaturamento','totLucro','totMargem','totUnitaria'].forEach(id => {
-      document.getElementById(id).textContent = '—';
-    });
+    ['totVolume','totFaturamento','totLucro','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
   }
-
-  const totMargemAD = totalV ? ((totalV + totalY) - totalQ) / totalV : null;
-  const totUnitAE   = totalI ? totalAA / totalI : null;
-
+  const totMargemAD = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
+  const totUnitAE   = totalI ? totalAA/totalI : null;
   document.getElementById('totVolume').textContent      = fmt.vol(totalI);
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
   document.getElementById('totLucro').textContent       = fmt.moeda(totalAA);
@@ -1026,7 +716,6 @@ function atualizarTotais() {
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
 
-// ─── EXPORT ──────────────────────────────────────────────────────────────────
 function gerarExport() {
   if (!clienteAtual || produtos.length === 0) return;
 
@@ -1040,47 +729,19 @@ function gerarExport() {
     const calc = calcularLinha(p);
     const nome = calc.nome || ('Produto ' + p.cod);
     const margemClass = calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'blue' : 'red';
-
     produtosHtml += `
       <div class="exp-product">
         <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
         <div class="exp-product-body">
-          <div>
-            <div class="exp-field-label">Qtde</div>
-            <div class="exp-field-value">${p.qtde || '—'}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">Volume Total</div>
-            <div class="exp-field-value">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">Custo SPL</div>
-            <div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">DPF / Emb.</div>
-            <div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">Preço Venda</div>
-            <div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">DPF Total</div>
-            <div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
-          </div>
-          <div style="grid-column:1/-1">
-            <div class="exp-field-label">Lucro Líquido Pós Premier</div>
-            <div class="exp-field-value blue" style="font-size:15px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">Margem Final</div>
-            <div class="exp-field-value ${margemClass}" style="font-size:15px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
-          </div>
-          <div>
-            <div class="exp-field-label">Unitária Final (R$/L)</div>
-            <div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
-          </div>
+          <div><div class="exp-field-label">Qtde</div><div class="exp-field-value">${p.qtde||'—'}</div></div>
+          <div><div class="exp-field-label">Volume Total</div><div class="exp-field-value">${calc.I != null ? fmt.vol(calc.I) : '—'}</div></div>
+          <div><div class="exp-field-label">Custo SPL</div><div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
+          <div><div class="exp-field-label">DPF / Emb.</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div></div>
+          <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
+          <div><div class="exp-field-label">DPF Total</div><div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
+          <div style="grid-column:1/-1"><div class="exp-field-label">Lucro Líquido Pós Premier</div><div class="exp-field-value blue" style="font-size:13px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div></div>
+          <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}" style="font-size:13px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
+          <div><div class="exp-field-label">Unitária Final (R$/L)</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
         </div>
       </div>`;
   });
@@ -1094,33 +755,18 @@ function gerarExport() {
       <div class="exp-totals">
         <div class="exp-totals-title">Resumo Total</div>
         <div class="exp-totals-grid">
-          <div>
-            <div class="exp-total-label">Volume Total</div>
-            <div class="exp-total-value">${fmt.vol(totalI)}</div>
-          </div>
-          <div>
-            <div class="exp-total-label">Faturamento</div>
-            <div class="exp-total-value">${fmt.moeda(totalU)}</div>
-          </div>
-          <div>
-            <div class="exp-total-label">Lucro Líq. Pós Premier</div>
-            <div class="exp-total-value accent">${fmt.moeda(totalAA)}</div>
-          </div>
-          <div>
-            <div class="exp-total-label">Margem Final</div>
-            <div class="exp-total-value accent">${fmt.pct(totMargem)}</div>
-          </div>
-          <div class="exp-full">
-            <div class="exp-total-label">Unitária Final Pós Premier</div>
-            <div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit) + ' R$/L' : '—'}</div>
-          </div>
+          <div><div class="exp-total-label">Volume Total</div><div class="exp-total-value">${fmt.vol(totalI)}</div></div>
+          <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
+          <div><div class="exp-total-label">Lucro Líq. Pós Premier</div><div class="exp-total-value accent">${fmt.moeda(totalAA)}</div></div>
+          <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totMargem)}</div></div>
+          <div class="exp-full"><div class="exp-total-label">Unitária Final Pós Premier</div><div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}</div></div>
         </div>
       </div>`;
   }
 
   document.getElementById('exportDoc').innerHTML = `
     <div class="exp-header">
-      <img src="logo-west.png" alt="West Brasil" onerror="this.style.display='none'">
+      <div class="exp-logo">West Brasil</div>
       <div class="exp-header-right">
         <div class="exp-title">Simulação de Margem</div>
         <div class="exp-date">${now}</div>
@@ -1128,59 +774,33 @@ function gerarExport() {
     </div>
     <div class="exp-client">
       <div class="exp-client-nome">${clienteAtual.nome}</div>
-      <div class="exp-client-info">${clienteAtual.ramo} &nbsp;|&nbsp; ${clienteAtual.segmento} &nbsp;|&nbsp; ${clienteAtual.imbp}</div>
+      <div class="exp-client-info">${clienteAtual.ramo} | ${clienteAtual.segmento} | ${clienteAtual.imbp}</div>
       <span class="exp-prazo-badge">Prazo: ${prazoAtual.cod}</span>
     </div>
     ${produtosHtml}
     ${totaisHtml}
-    <div class="exp-footer">West Brasil Lubrificantes &nbsp;•&nbsp; Simulador de Margem Unitária</div>
+    <div class="exp-footer">West Brasil Lubrificantes • Simulador de Margem Unitária</div>
   `;
 
-  document.getElementById('exportOverlay').style.display = 'block';
-  window.scrollTo(0, 0);
+  const overlay = document.getElementById('exportOverlay');
+  overlay.classList.add('visible');
+
+  const doc = document.getElementById('exportDoc');
+  doc.style.zoom = '1';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const wrap = document.getElementById('exportDocWrap');
+    const dispH = wrap.clientHeight - 8;
+    const docH  = doc.scrollHeight;
+    if (docH > dispH) {
+      doc.style.zoom = String((dispH / docH).toFixed(4));
+    }
+  }));
 }
 
 function fecharExport() {
-  document.getElementById('exportOverlay').style.display = 'none';
-}
-
-function compartilharTexto() {
-  if (!navigator.share) return;
-
-  const now = new Date().toLocaleDateString('pt-BR', {
-    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
-  });
-
-  let txt = `*West Brasil — Simulação de Margem*\n`;
-  txt += `📅 ${now}\n\n`;
-  txt += `*Cliente:* ${clienteAtual.nome}\n`;
-  txt += `${clienteAtual.ramo} | ${clienteAtual.segmento}\n`;
-  txt += `*Prazo:* ${prazoAtual.cod}\n`;
-
-  produtos.forEach((p, idx) => {
-    if (!p.cod) return;
-    const calc = calcularLinha(p);
-    const nome = calc.nome || p.cod;
-    txt += `\n*#${idx+1} — ${nome}*\n`;
-    txt += `Qtde: ${p.qtde||'—'} | Vol: ${calc.I != null ? fmt.vol(calc.I) : '—'}\n`;
-    txt += `Preço Venda: ${fmt.moeda(parseFloat(p.preco)||0)}\n`;
-    txt += `Custo SPL: ${calc.J != null ? fmt.moeda(calc.J) : '—'}\n`;
-    txt += `Lucro Líq.: ${calc.AA != null ? fmt.moeda(calc.AA) : '—'}\n`;
-    txt += `Margem: ${calc.AD != null ? fmt.pct(calc.AD) : '—'} | Unitária: ${calc.AE != null ? fmt.num(calc.AE)+' R$/L' : '—'}\n`;
-  });
-
-  const { totalI, totalU, totalAA, totalV, totalY, totalQ, linhasValidas } = calcularTotais();
-  if (linhasValidas) {
-    const totMargem = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
-    const totUnit   = totalI ? totalAA/totalI : null;
-    txt += `\n*📊 RESUMO TOTAL*\n`;
-    txt += `Volume: ${fmt.vol(totalI)} | Fat: ${fmt.moeda(totalU)}\n`;
-    txt += `Lucro Líq.: ${fmt.moeda(totalAA)}\n`;
-    txt += `Margem Final: ${fmt.pct(totMargem)}\n`;
-    txt += `Unitária Final: ${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}\n`;
-  }
-
-  navigator.share({ title: 'Simulação West Brasil', text: txt }).catch(() => {});
+  document.getElementById('exportOverlay').classList.remove('visible');
+  document.getElementById('exportDoc').style.zoom = '1';
 }
 </script>
 </body>
