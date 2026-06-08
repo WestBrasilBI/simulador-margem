@@ -378,7 +378,7 @@
 <header>
   <div class="header-row">
     <div>
-      <div class="logo">WEST<span>.</span>BI</div>
+      <div class="logo">WEST<span>.</span>BRASIL</div>
       <div class="subtitle">Simulador de Margem Unitária</div>
     </div>
     <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
@@ -531,7 +531,12 @@ function irParaTela3() {
   if (!prazoAtual) return;
   setScreen(3);
   renderizarResumoTopo();
-  if (produtos.length === 0) adicionarProduto();
+  if (produtos.length === 0) {
+    adicionarProduto();
+  } else {
+    produtos.forEach(p => atualizarDisplayCard(p.id));
+    atualizarTotais();
+  }
 }
 
 function resetAll() {
@@ -697,7 +702,7 @@ function criarCardProduto(p, num) {
   return `<div class="produto-card" id="card_${p.id}">
     <div class="produto-header">
       <span class="produto-num">#${num}</span>
-      <span class="produto-nome-header">${nomeExibir}</span>
+      <span class="produto-nome-header" id="pNome_${p.id}">${nomeExibir}</span>
       <button class="btn-remove" onclick="removerProduto(${p.id})">×</button>
     </div>
     <div class="produto-body">
@@ -706,7 +711,6 @@ function criarCardProduto(p, num) {
           <label>CÓD. PRODUTO</label>
           <input type="text" id="pCod_${p.id}" value="${p.cod}" placeholder="Ex: 123049"
                  inputmode="numeric"
-                 onchange="atualizarCampo(${p.id},'cod',this.value)"
                  oninput="atualizarCampo(${p.id},'cod',this.value)">
         </div>
         <div class="input-group">
@@ -733,19 +737,19 @@ function criarCardProduto(p, num) {
         <div class="calc-grid">
           <div class="calc-item">
             <div class="calc-label">Volume Total</div>
-            <div class="calc-value">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
+            <div class="calc-value" id="pVolTotal_${p.id}">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
           </div>
           <div class="calc-item">
             <div class="calc-label">Custo SPL</div>
-            <div class="calc-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
+            <div class="calc-value" id="pCustoSpl_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
           </div>
           <div class="calc-item">
             <div class="calc-label">DPF / Litro</div>
-            <div class="calc-value">${calc.L != null ? fmt.moeda(calc.L) : '—'}</div>
+            <div class="calc-value" id="pDpfLitro_${p.id}">${calc.L != null ? fmt.moeda(calc.L) : '—'}</div>
           </div>
           <div class="calc-item">
             <div class="calc-label">DPF Total</div>
-            <div class="calc-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
+            <div class="calc-value" id="pDpfTotal_${p.id}">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
           </div>
         </div>
 
@@ -754,15 +758,15 @@ function criarCardProduto(p, num) {
         <div class="calc-grid">
           <div class="calc-item" style="grid-column:1/-1">
             <div class="calc-label">Lucro Líquido Total (Pós Premier)</div>
-            <div class="calc-value highlight" style="font-size:17px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
+            <div class="calc-value highlight" id="pLucro_${p.id}" style="font-size:17px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
           </div>
           <div class="calc-item">
             <div class="calc-label">Margem Final Pós Premier</div>
-            <div class="calc-value ${marginColor}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
+            <div class="calc-value ${marginColor}" id="pMargem_${p.id}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
           </div>
           <div class="calc-item">
             <div class="calc-label">Unitária Final Pós Premier (R$/L)</div>
-            <div class="calc-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
+            <div class="calc-value" id="pUnitaria_${p.id}">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
           </div>
         </div>
       </div>
@@ -774,13 +778,36 @@ function atualizarCampo(id, campo, valor) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
   p[campo] = valor;
-  // Re-renderiza apenas o card afetado
-  const card = document.getElementById('card_' + id);
-  if (card) {
-    const num = produtos.indexOf(p) + 1;
-    card.outerHTML = criarCardProduto(p, num);
-  }
+  atualizarDisplayCard(id);
   atualizarTotais();
+}
+
+function atualizarDisplayCard(id) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  const calc = calcularLinha(p);
+
+  // Atualiza nome no cabeçalho do card
+  const nomeEl = document.getElementById('pNome_' + id);
+  if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
+
+  // Atualiza somente os campos calculados (sem tocar nos inputs)
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
+  set('pVolTotal_'  + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
+  set('pCustoSpl_'  + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
+  set('pDpfLitro_'  + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
+  set('pDpfTotal_'  + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
+  set('pLucro_'     + id, calc.AA != null ? fmt.moeda(calc.AA): '—');
+  set('pUnitaria_'  + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
+
+  const margemEl = document.getElementById('pMargem_' + id);
+  if (margemEl) {
+    margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
+    margemEl.className = 'calc-value ' + (
+      calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red'
+    );
+    margemEl.style.fontSize = '16px';
+  }
 }
 
 // ─── CÁLCULOS ────────────────────────────────────────────────────────────────
