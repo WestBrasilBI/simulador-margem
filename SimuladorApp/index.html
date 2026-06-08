@@ -34,16 +34,23 @@
   header {
     background: var(--blue);
     color: var(--white);
-    padding: 14px 16px 12px;
+    padding: 12px 16px 10px;
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
   .header-row { display: flex; align-items: center; gap: 10px; }
-  .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
-  .logo span { color: var(--red); }
-  .subtitle { font-size: 11px; opacity: 0.7; margin-top: 1px; }
+  .logo-wrap {
+    background: white;
+    border-radius: 7px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .logo-wrap img { height: 30px; display: block; }
+  .subtitle { font-size: 11px; opacity: 0.75; flex: 1; }
   .btn-reset {
     margin-left: auto;
     background: rgba(255,255,255,0.15);
@@ -54,12 +61,13 @@
     font-size: 12px;
     cursor: pointer;
     font-weight: 600;
+    flex-shrink: 0;
   }
 
   /* STEPS BAR */
   .steps-bar {
     background: var(--blue);
-    padding: 0 16px 14px;
+    padding: 0 16px 12px;
     display: flex;
     gap: 6px;
   }
@@ -178,16 +186,8 @@
     align-items: center;
     gap: 2px;
   }
-  .prazo-btn .pct {
-    font-size: 10px;
-    font-weight: 400;
-    color: var(--gray-text);
-  }
-  .prazo-btn.selected {
-    border-color: var(--blue);
-    background: var(--blue);
-    color: white;
-  }
+  .prazo-btn .pct { font-size: 10px; font-weight: 400; color: var(--gray-text); }
+  .prazo-btn.selected { border-color: var(--blue); background: var(--blue); color: white; }
   .prazo-btn.selected .pct { color: rgba(255,255,255,0.7); }
   .prazo-btn.neg .pct { color: var(--red); }
   .prazo-btn.selected.neg .pct { color: rgba(255,255,255,0.7); }
@@ -241,7 +241,6 @@
     gap: 10px;
     margin-bottom: 12px;
   }
-  .input-group { }
   .input-group label { font-size: 11px; font-weight: 600; color: var(--gray-text); margin-bottom: 4px; }
   .input-group input {
     width: 100%;
@@ -255,23 +254,13 @@
   }
   .input-group input:focus { border-color: var(--blue); }
 
-  .calc-section {
-    background: var(--gray-bg);
-    border-radius: 8px;
-    padding: 12px;
-  }
-  .calc-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .calc-item { }
+  .calc-section { background: var(--gray-bg); border-radius: 8px; padding: 12px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; }
   .calc-value { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 1px; }
   .calc-value.highlight { color: var(--blue); font-size: 15px; }
   .calc-value.green { color: var(--green); }
   .calc-value.red { color: var(--red); }
-
   .separator { border: none; border-top: 1px solid var(--gray-border); margin: 10px 0; }
 
   /* TOTALS */
@@ -283,12 +272,7 @@
     margin-top: 4px;
   }
   .totals-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; opacity: 0.8; }
-  .totals-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .total-item { }
+  .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .total-label { font-size: 10px; font-weight: 600; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.3px; }
   .total-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
   .total-value.accent { color: #ffd166; }
@@ -340,6 +324,22 @@
   }
   .btn-add:active { background: var(--gray-bg); }
   .btn-add-icon { font-size: 22px; font-weight: 400; }
+  .btn-export {
+    width: 100%;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
   /* ALERTS */
   .alert {
@@ -354,12 +354,7 @@
   .alert.error { background: #fdecea; border-color: var(--red); color: #9b1a20; }
 
   /* VERSION */
-  .version-tag {
-    text-align: center;
-    font-size: 11px;
-    color: var(--gray-text);
-    padding: 12px;
-  }
+  .version-tag { text-align: center; font-size: 11px; color: var(--gray-text); padding: 12px; }
 
   /* PRAZO SELECTED DISPLAY */
   .prazo-display {
@@ -371,16 +366,145 @@
     color: var(--gray-text);
   }
   .prazo-display strong { color: var(--text); }
+
+  /* ── EXPORT OVERLAY ────────────────────────────────────────── */
+  #exportOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #f0f2f5;
+    z-index: 300;
+    overflow-y: auto;
+    padding: 16px 16px 100px;
+  }
+  #exportDoc {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    max-width: 560px;
+    margin: 0 auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .exp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--blue);
+    margin-bottom: 14px;
+  }
+  .exp-header img { height: 38px; }
+  .exp-header-right { text-align: right; }
+  .exp-header-right .exp-title { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
+  .exp-header-right .exp-date { font-size: 11px; color: var(--gray-text); margin-top: 2px; }
+  .exp-client {
+    background: var(--gray-bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .exp-client-nome { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .exp-client-info { font-size: 12px; color: var(--gray-text); margin-bottom: 6px; }
+  .exp-prazo-badge {
+    display: inline-block;
+    background: var(--blue);
+    color: white;
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .exp-product {
+    border: 1.5px solid var(--gray-border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+  .exp-product-hdr {
+    background: var(--blue);
+    color: white;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .exp-product-body {
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .exp-field-label { font-size: 10px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
+  .exp-field-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .exp-field-value.green { color: var(--green); }
+  .exp-field-value.red { color: var(--red); }
+  .exp-field-value.blue { color: var(--blue); }
+  .exp-totals {
+    background: var(--blue);
+    color: white;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 4px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .exp-totals-title { font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 12px; letter-spacing: 0.5px; }
+  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .exp-total-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
+  .exp-total-value { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .exp-total-value.accent { color: #ffd166; }
+  .exp-full { grid-column: 1/-1; }
+  .exp-footer { font-size: 10px; color: var(--gray-text); text-align: center; margin-top: 14px; }
+
+  .export-actions {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--gray-border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 301;
+  }
+  .export-actions button {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-exp-print { background: var(--blue); color: white; }
+  .btn-exp-share { background: #25D366; color: white; }
+  .btn-exp-close { background: var(--gray-bg); color: var(--text); }
+
+  /* PRINT */
+  @media print {
+    body * { visibility: hidden; }
+    #exportOverlay, #exportOverlay * { visibility: visible; }
+    #exportOverlay {
+      position: absolute !important;
+      top: 0; left: 0;
+      background: white !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+    .export-actions { display: none !important; }
+    #exportDoc { box-shadow: none !important; border-radius: 0 !important; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-row">
-    <div>
-      <div class="logo">WEST<span>.</span>BI</div>
-      <div class="subtitle">Simulador de Margem Unitária</div>
+    <div class="logo-wrap">
+      <img src="logo-west.png" alt="West Brasil" onerror="this.parentNode.innerHTML='<span style=\'font-weight:800;font-size:16px;color:#0c4976\'>West Brasil</span>'">
     </div>
+    <div class="subtitle" style="margin-left:10px;">Simulador de Margem Unitária</div>
     <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
   </div>
   <div class="steps-bar" id="stepsBar">
@@ -394,7 +518,6 @@
 <div class="screen active" id="screen1">
   <div class="card">
     <div class="card-title">1. Identificação do Cliente</div>
-
     <div class="search-wrap">
       <label for="inputCliente">Código ou nome do cliente</label>
       <input type="text" id="inputCliente" placeholder="Ex: 3657 ou G-KT Brasil..."
@@ -403,18 +526,15 @@
              onkeydown="navegarLista(event)">
       <div class="autocomplete-list" id="autoList" style="display:none"></div>
     </div>
-
     <div id="clienteInfo" style="display:none; margin-top:14px;">
       <div class="client-info">
         <h3 id="clienteNome"></h3>
         <div id="clienteDetalhes" class="client-info-row"></div>
       </div>
     </div>
-
     <div id="clienteErro" class="alert error" style="display:none;margin-top:10px;">
       Cliente não encontrado. Verifique o código.
     </div>
-
     <button class="btn-primary" id="btnProceed1" onclick="irParaTela2()" style="display:none">
       Próximo: Prazo de Pagamento →
     </button>
@@ -474,7 +594,18 @@
     </div>
   </div>
 
-  <button class="btn-secondary" style="margin-top:12px;" onclick="irParaTela2()">← Alterar Prazo</button>
+  <button class="btn-export" onclick="gerarExport()">↗ Compartilhar Simulação</button>
+  <button class="btn-secondary" style="margin-top:8px;" onclick="irParaTela2()">← Alterar Prazo</button>
+</div>
+
+<!-- ═══════════════ EXPORT OVERLAY ═══════════════ -->
+<div id="exportOverlay">
+  <div id="exportDoc"></div>
+  <div class="export-actions">
+    <button class="btn-exp-print" onclick="window.print()">🖨 PDF</button>
+    <button class="btn-exp-share" id="btnShare" onclick="compartilharTexto()" style="display:none">📤 WhatsApp</button>
+    <button class="btn-exp-close" onclick="fecharExport()">✕ Fechar</button>
+  </div>
 </div>
 
 <script src="data/data.js"></script>
@@ -505,6 +636,7 @@ window.addEventListener('load', () => {
     if (typeof DATA_VERSION !== 'undefined') tag.textContent = 'Dados de: ' + DATA_VERSION;
     else tag.textContent = 'Dados carregados';
     renderizarPrazos();
+    if (navigator.share) document.getElementById('btnShare').style.display = 'flex';
   } catch(e) {
     document.getElementById('versionTag').textContent = 'Erro ao carregar dados';
   }
@@ -692,10 +824,8 @@ function renderizarProdutos() {
 function criarCardProduto(p, num) {
   const calc = calcularLinha(p);
   const nomeExibir = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
-
   const marginColor = calc.AD != null && !isNaN(calc.AD)
-    ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red')
-    : '';
+    ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red') : '';
 
   return `<div class="produto-card" id="card_${p.id}">
     <div class="produto-header">
@@ -708,29 +838,24 @@ function criarCardProduto(p, num) {
         <div class="input-group" style="grid-column:1/-1">
           <label>CÓD. PRODUTO</label>
           <input type="text" id="pCod_${p.id}" value="${p.cod}" placeholder="Ex: 123049"
-                 inputmode="numeric"
-                 oninput="atualizarCampo(${p.id},'cod',this.value)">
+                 inputmode="numeric" oninput="atualizarCampo(${p.id},'cod',this.value)">
         </div>
         <div class="input-group">
           <label>QTDE</label>
           <input type="number" id="pQtde_${p.id}" value="${p.qtde}" placeholder="0"
-                 min="0" step="1" inputmode="decimal"
-                 oninput="atualizarCampo(${p.id},'qtde',this.value)">
+                 min="0" step="1" inputmode="decimal" oninput="atualizarCampo(${p.id},'qtde',this.value)">
         </div>
         <div class="input-group">
           <label>DPF / EMBALAGEM (R$)</label>
           <input type="number" id="pDpf_${p.id}" value="${p.dpf}" placeholder="0"
-                 min="0" step="0.01" inputmode="decimal"
-                 oninput="atualizarCampo(${p.id},'dpf',this.value)">
+                 min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'dpf',this.value)">
         </div>
         <div class="input-group" style="grid-column:1/-1">
           <label>PREÇO VENDA FATURADO (R$ / embalagem)</label>
           <input type="number" id="pPreco_${p.id}" value="${p.preco}" placeholder="0.00"
-                 min="0" step="0.01" inputmode="decimal"
-                 oninput="atualizarCampo(${p.id},'preco',this.value)">
+                 min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'preco',this.value)">
         </div>
       </div>
-
       <div class="calc-section">
         <div class="calc-grid">
           <div class="calc-item">
@@ -750,9 +875,7 @@ function criarCardProduto(p, num) {
             <div class="calc-value" id="pDpfTotal_${p.id}">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
           </div>
         </div>
-
         <hr class="separator">
-
         <div class="calc-grid">
           <div class="calc-item" style="grid-column:1/-1">
             <div class="calc-label">Lucro Líquido Total (Pós Premier)</div>
@@ -791,12 +914,12 @@ function atualizarDisplayCard(id) {
   if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
 
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
-  set('pVolTotal_'  + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
-  set('pCustoSpl_'  + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
-  set('pDpfLitro_'  + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
-  set('pDpfTotal_'  + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
-  set('pLucro_'     + id, calc.AA != null ? fmt.moeda(calc.AA): '—');
-  set('pUnitaria_'  + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
+  set('pVolTotal_' + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
+  set('pCustoSpl_' + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
+  set('pDpfLitro_' + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
+  set('pDpfTotal_' + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
+  set('pLucro_'    + id, calc.AA != null ? fmt.moeda(calc.AA): '—');
+  set('pUnitaria_' + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
 
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
@@ -822,96 +945,74 @@ function calcularLinha(p) {
 
   const fator = parseFloat(CONVERSAO[prodCod]) || 1;
   const I = qtde * fator;
-
   const nomeProd = NOMES_PRODUTO[prodCod] || null;
 
   let custoEntry = null;
   if (isConsumo) {
-    const k1 = prodCod + imbp + ramo;
-    const k2 = prodCod + ramo;
-    custoEntry = CUSTO[k1] || CUSTO[k2] || CUSTO[prodCod];
+    custoEntry = CUSTO[prodCod+imbp+ramo] || CUSTO[prodCod+ramo] || CUSTO[prodCod];
   } else {
-    const k1 = prodCod + segmento + imbp + ramo;
-    const k2 = prodCod + ramo;
-    custoEntry = CUSTO[k1] || CUSTO[k2] || CUSTO[prodCod];
+    custoEntry = CUSTO[prodCod+segmento+imbp+ramo] || CUSTO[prodCod+ramo] || CUSTO[prodCod];
   }
 
   const J    = custoEntry ? custoEntry.custo : null;
-  const nome = custoEntry ? custoEntry.nome : nomeProd;
-
+  const nome = custoEntry ? custoEntry.nome  : nomeProd;
   if (J == null) return { nome };
 
   const L = fator ? dpfEmb / fator : 0;
   const M = dpfEmb * qtde;
-
   const N = J + dpfEmb;
   const O = N * qtde;
 
   let premierPct = PREMIER_DEFAULT;
   if (isConsumo) {
-    const k1 = prodCod + imbp + ramo;
-    const k2 = prodCod + ramo;
-    if (PREMIER[k1] !== undefined) premierPct = PREMIER[k1];
-    else if (PREMIER[k2] !== undefined) premierPct = PREMIER[k2];
+    if (PREMIER[prodCod+imbp+ramo] !== undefined) premierPct = PREMIER[prodCod+imbp+ramo];
+    else if (PREMIER[prodCod+ramo] !== undefined) premierPct = PREMIER[prodCod+ramo];
   } else {
-    const k1 = prodCod + segmento + imbp + ramo;
-    const k2 = prodCod + ramo;
-    if (PREMIER[k1] !== undefined) premierPct = PREMIER[k1];
-    else if (PREMIER[k2] !== undefined) premierPct = PREMIER[k2];
+    if (PREMIER[prodCod+segmento+imbp+ramo] !== undefined) premierPct = PREMIER[prodCod+segmento+imbp+ramo];
+    else if (PREMIER[prodCod+ramo] !== undefined) premierPct = PREMIER[prodCod+ramo];
   }
   const P = N * premierPct * 0.9075 + N * (1 - premierPct);
   const Q = P * qtde;
 
-  const T = preco * 0.9075;
-  const U = preco * qtde;
-  const V = T * qtde;
-
-  const W = U - O;
+  const T  = preco * 0.9075;
+  const U  = preco * qtde;
+  const V  = T * qtde;
+  const W  = U - O;
   const pctFin = prazoAtual ? prazoAtual.val : 0;
-  const X = preco * pctFin;
-  const Y = X * qtde;
-
+  const X  = preco * pctFin;
+  const Y  = X * qtde;
   const Z  = W + Y;
   const AA = (V - Q) + Y;
-
-  const AB = U  ? Z / U : null;
-  const AC = I  ? Z / I : null;
   const AD = V  ? ((V + Y) - Q) / V : null;
   const AE = I  ? AA / I : null;
 
   return { nome, I, J, L, M, AA, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q };
 }
 
-function atualizarTotais() {
-  const card = document.getElementById('totalsCard');
-
-  if (produtos.length === 0) {
-    card.style.display = 'none';
-    return;
-  }
-  card.style.display = 'block';
-
+function calcularTotais() {
   let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
-
   for (const p of produtos) {
     const c = calcularLinha(p);
     if (c._U) {
-      totalI  += c._I  || 0;
-      totalU  += c._U  || 0;
-      totalV  += c._V  || 0;
-      totalY  += c._Y  || 0;
-      totalQ  += c._Q  || 0;
-      totalAA += c._AA || 0;
+      totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0;
+      totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0;
       linhasValidas++;
     }
   }
+  return { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas };
+}
+
+function atualizarTotais() {
+  const card = document.getElementById('totalsCard');
+  if (produtos.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
 
   if (!linhasValidas) {
-    document.getElementById('totVolume').textContent      = '—';
-    document.getElementById('totFaturamento').textContent = '—';
-    document.getElementById('totLucro').textContent       = '—';
-    document.getElementById('totMargem').textContent      = '—';
-    document.getElementById('totUnitaria').textContent    = '—';
+    ['totVolume','totFaturamento','totLucro','totMargem','totUnitaria'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
     return;
   }
 
@@ -923,6 +1024,163 @@ function atualizarTotais() {
   document.getElementById('totLucro').textContent       = fmt.moeda(totalAA);
   document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
+function gerarExport() {
+  if (!clienteAtual || produtos.length === 0) return;
+
+  const now = new Date().toLocaleDateString('pt-BR', {
+    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+
+  let produtosHtml = '';
+  produtos.forEach((p, idx) => {
+    if (!p.cod) return;
+    const calc = calcularLinha(p);
+    const nome = calc.nome || ('Produto ' + p.cod);
+    const margemClass = calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'blue' : 'red';
+
+    produtosHtml += `
+      <div class="exp-product">
+        <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
+        <div class="exp-product-body">
+          <div>
+            <div class="exp-field-label">Qtde</div>
+            <div class="exp-field-value">${p.qtde || '—'}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">Volume Total</div>
+            <div class="exp-field-value">${calc.I != null ? fmt.vol(calc.I) : '—'}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">Custo SPL</div>
+            <div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">DPF / Emb.</div>
+            <div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">Preço Venda</div>
+            <div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">DPF Total</div>
+            <div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div>
+          </div>
+          <div style="grid-column:1/-1">
+            <div class="exp-field-label">Lucro Líquido Pós Premier</div>
+            <div class="exp-field-value blue" style="font-size:15px">${calc.AA != null ? fmt.moeda(calc.AA) : '—'}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">Margem Final</div>
+            <div class="exp-field-value ${margemClass}" style="font-size:15px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
+          </div>
+          <div>
+            <div class="exp-field-label">Unitária Final (R$/L)</div>
+            <div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
+  let totaisHtml = '';
+  if (linhasValidas) {
+    const totMargem = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
+    const totUnit   = totalI ? totalAA/totalI : null;
+    totaisHtml = `
+      <div class="exp-totals">
+        <div class="exp-totals-title">Resumo Total</div>
+        <div class="exp-totals-grid">
+          <div>
+            <div class="exp-total-label">Volume Total</div>
+            <div class="exp-total-value">${fmt.vol(totalI)}</div>
+          </div>
+          <div>
+            <div class="exp-total-label">Faturamento</div>
+            <div class="exp-total-value">${fmt.moeda(totalU)}</div>
+          </div>
+          <div>
+            <div class="exp-total-label">Lucro Líq. Pós Premier</div>
+            <div class="exp-total-value accent">${fmt.moeda(totalAA)}</div>
+          </div>
+          <div>
+            <div class="exp-total-label">Margem Final</div>
+            <div class="exp-total-value accent">${fmt.pct(totMargem)}</div>
+          </div>
+          <div class="exp-full">
+            <div class="exp-total-label">Unitária Final Pós Premier</div>
+            <div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit) + ' R$/L' : '—'}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('exportDoc').innerHTML = `
+    <div class="exp-header">
+      <img src="logo-west.png" alt="West Brasil" onerror="this.style.display='none'">
+      <div class="exp-header-right">
+        <div class="exp-title">Simulação de Margem</div>
+        <div class="exp-date">${now}</div>
+      </div>
+    </div>
+    <div class="exp-client">
+      <div class="exp-client-nome">${clienteAtual.nome}</div>
+      <div class="exp-client-info">${clienteAtual.ramo} &nbsp;|&nbsp; ${clienteAtual.segmento} &nbsp;|&nbsp; ${clienteAtual.imbp}</div>
+      <span class="exp-prazo-badge">Prazo: ${prazoAtual.cod}</span>
+    </div>
+    ${produtosHtml}
+    ${totaisHtml}
+    <div class="exp-footer">West Brasil Lubrificantes &nbsp;•&nbsp; Simulador de Margem Unitária</div>
+  `;
+
+  document.getElementById('exportOverlay').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function fecharExport() {
+  document.getElementById('exportOverlay').style.display = 'none';
+}
+
+function compartilharTexto() {
+  if (!navigator.share) return;
+
+  const now = new Date().toLocaleDateString('pt-BR', {
+    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+
+  let txt = `*West Brasil — Simulação de Margem*\n`;
+  txt += `📅 ${now}\n\n`;
+  txt += `*Cliente:* ${clienteAtual.nome}\n`;
+  txt += `${clienteAtual.ramo} | ${clienteAtual.segmento}\n`;
+  txt += `*Prazo:* ${prazoAtual.cod}\n`;
+
+  produtos.forEach((p, idx) => {
+    if (!p.cod) return;
+    const calc = calcularLinha(p);
+    const nome = calc.nome || p.cod;
+    txt += `\n*#${idx+1} — ${nome}*\n`;
+    txt += `Qtde: ${p.qtde||'—'} | Vol: ${calc.I != null ? fmt.vol(calc.I) : '—'}\n`;
+    txt += `Preço Venda: ${fmt.moeda(parseFloat(p.preco)||0)}\n`;
+    txt += `Custo SPL: ${calc.J != null ? fmt.moeda(calc.J) : '—'}\n`;
+    txt += `Lucro Líq.: ${calc.AA != null ? fmt.moeda(calc.AA) : '—'}\n`;
+    txt += `Margem: ${calc.AD != null ? fmt.pct(calc.AD) : '—'} | Unitária: ${calc.AE != null ? fmt.num(calc.AE)+' R$/L' : '—'}\n`;
+  });
+
+  const { totalI, totalU, totalAA, totalV, totalY, totalQ, linhasValidas } = calcularTotais();
+  if (linhasValidas) {
+    const totMargem = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
+    const totUnit   = totalI ? totalAA/totalI : null;
+    txt += `\n*📊 RESUMO TOTAL*\n`;
+    txt += `Volume: ${fmt.vol(totalI)} | Fat: ${fmt.moeda(totalU)}\n`;
+    txt += `Lucro Líq.: ${fmt.moeda(totalAA)}\n`;
+    txt += `Margem Final: ${fmt.pct(totMargem)}\n`;
+    txt += `Unitária Final: ${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}\n`;
+  }
+
+  navigator.share({ title: 'Simulação West Brasil', text: txt }).catch(() => {});
 }
 </script>
 </body>
