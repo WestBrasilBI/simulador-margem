@@ -327,6 +327,10 @@
         <div class="total-value" id="totFaturamento">—</div>
       </div>
       <div class="total-item">
+        <div class="total-label">Margem Bruta %</div>
+        <div class="total-value" id="totMargemBruta">—</div>
+      </div>
+      <div class="total-item">
         <div class="total-label">Margem Final</div>
         <div class="total-value accent" id="totMargem">—</div>
       </div>
@@ -591,10 +595,14 @@ function criarCardProduto(p, num) {
         <hr class="separator">
         <div class="calc-grid">
           <div class="calc-item">
+            <div class="calc-label">Margem Bruta %</div>
+            <div class="calc-value" id="pMargemBruta_${p.id}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div>
+          </div>
+          <div class="calc-item">
             <div class="calc-label">Margem Final Pós Premier</div>
             <div class="calc-value ${marginColor}" id="pMargem_${p.id}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
           </div>
-          <div class="calc-item">
+          <div class="calc-item" style="grid-column:1/-1">
             <div class="calc-label">Unitária Final Pós Premier (R$/L)</div>
             <div class="calc-value" id="pUnitaria_${p.id}">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
           </div>
@@ -618,11 +626,12 @@ function atualizarDisplayCard(id) {
   const nomeEl = document.getElementById('pNome_' + id);
   if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
-  set('pVolTotal_' + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
-  set('pCustoSpl_' + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
-  set('pDpfLitro_' + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
-  set('pDpfTotal_' + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
-  set('pUnitaria_' + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
+  set('pVolTotal_'    + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
+  set('pCustoSpl_'   + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
+  set('pDpfLitro_'   + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
+  set('pDpfTotal_'   + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
+  set('pMargemBruta_'+ id, calc.AB != null ? fmt.pct(calc.AB)  : '—');
+  set('pUnitaria_'   + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
     margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
@@ -674,22 +683,23 @@ function calcularLinha(p) {
   const U  = preco * qtde;
   const V  = T * qtde;
   const W  = U - O;
+  const AB = U ? W / U : null;
   const pctFin = prazoAtual ? prazoAtual.val : 0;
   const X  = preco * pctFin;
   const Y  = X * qtde;
   const AA = (V - Q) + Y;
   const AD = V ? ((V + Y) - Q) / V : null;
   const AE = I ? AA / I : null;
-  return { nome, I, J, L, M, AA, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q };
+  return { nome, I, J, L, M, AA, AB, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q, _O: O };
 }
 
 function calcularTotais() {
-  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
+  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, totalO=0, linhasValidas=0;
   for (const p of produtos) {
     const c = calcularLinha(p);
-    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; linhasValidas++; }
+    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; totalO+=c._O||0; linhasValidas++; }
   }
-  return { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas };
+  return { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas };
 }
 
 function atualizarTotais() {
@@ -698,13 +708,15 @@ function atualizarTotais() {
   card.style.display = 'block';
   const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
   if (!linhasValidas) {
-    ['totVolume','totFaturamento','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    ['totVolume','totFaturamento','totMargemBruta','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
   }
-  const totMargemAD = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
-  const totUnitAE   = totalI ? totalAA/totalI : null;
+  const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
+  const totMargemAD    = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
+  const totUnitAE      = totalI ? totalAA/totalI : null;
   document.getElementById('totVolume').textContent      = fmt.vol(totalI);
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
+  document.getElementById('totMargemBruta').textContent = fmt.pct(totMargemBruta);
   document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
@@ -733,6 +745,7 @@ function gerarExport() {
           <div><div class="exp-field-label">DPF / Emb.</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
           <div><div class="exp-field-label">DPF Total</div><div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
+          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
           <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}" style="font-size:13px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
           <div><div class="exp-field-label">Unitária Final (R$/L)</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
         </div>
@@ -742,6 +755,7 @@ function gerarExport() {
   const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
   let totaisHtml = '';
   if (linhasValidas) {
+    const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
     const totMargem = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
     const totUnit   = totalI ? totalAA/totalI : null;
     totaisHtml = `
@@ -750,6 +764,7 @@ function gerarExport() {
         <div class="exp-totals-grid">
           <div><div class="exp-total-label">Volume Total</div><div class="exp-total-value">${fmt.vol(totalI)}</div></div>
           <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
+          <div><div class="exp-total-label">Margem Bruta %</div><div class="exp-total-value">${fmt.pct(totMargemBruta)}</div></div>
           <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totMargem)}</div></div>
           <div class="exp-full"><div class="exp-total-label">Unitária Final Pós Premier</div><div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}</div></div>
         </div>
