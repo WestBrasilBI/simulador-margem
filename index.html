@@ -783,7 +783,7 @@ function atualizarTotais() {
   const card = document.getElementById('totalsCard');
   if (produtos.length === 0) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
   if (!linhasValidas) {
     ['totVolume','totFaturamento','totMargemBruta','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
@@ -830,7 +830,7 @@ function gerarExport() {
       </div>`;
   });
 
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
   let totaisHtml = '';
   if (linhasValidas) {
     const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
