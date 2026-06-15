@@ -1,8 +1,9 @@
-{
+﻿{
   "name": "Simulador de Margem - West Brasil",
   "short_name": "Simulador MG",
   "description": "Simulador de margem unitária para vendedores West Brasil",
-  "start_url": "/",
+  "start_url": "/simulador-margem/SimuladorApp/",
+  "scope": "/simulador-margem/SimuladorApp/",
   "display": "standalone",
   "background_color": "#0c4976",
   "theme_color": "#0c4976",
