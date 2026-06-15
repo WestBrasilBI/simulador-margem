@@ -161,11 +161,17 @@
   /* VERSION */
   .version-tag { text-align: center; font-size: 11px; color: var(--gray-text); padding: 12px; }
 
+  /* HISTÓRICO */
+  .hist-cli { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+  .hist-cli-icon { font-size: 13px; }
+  .hist-prod { background: #eef4fb; border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: var(--gray-text); display: none; }
+  .hist-prod strong { color: var(--blue); font-weight: 700; }
+
   /* PRAZO DISPLAY */
   .prazo-display { background: var(--gray-bg); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--gray-text); }
   .prazo-display strong { color: var(--text); }
 
-  /* EXPORT OVERLAY */
+  /* ═══ EXPORT OVERLAY ════════════════════════════════════════ */
   #exportOverlay {
     display: none;
     position: fixed;
@@ -192,6 +198,7 @@
     transform-origin: top center;
   }
 
+  /* Export doc content styles */
   .exp-header {
     display: flex;
     justify-content: space-between;
@@ -229,6 +236,7 @@
 
   .exp-footer { font-size: 8px; color: var(--gray-text); text-align: center; margin-top: 8px; }
 
+  /* Bottom bar */
   .export-bar {
     background: white;
     border-top: 1px solid var(--gray-border);
@@ -241,6 +249,35 @@
   .export-bar-hint { font-size: 12px; color: var(--gray-text); }
   .export-bar-hint strong { color: var(--text); }
   .btn-fechar { background: var(--gray-bg); border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; }
+
+  /* UPDATE TOAST */
+  #updateToast {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: white;
+    border-radius: 24px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  .toast-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -260,7 +297,7 @@
   </div>
 </header>
 
-<!-- TELA 1: CLIENTE -->
+<!-- ═══════════════ TELA 1: CLIENTE ═══════════════ -->
 <div class="screen active" id="screen1">
   <div class="card">
     <div class="card-title">1. Identificação do Cliente</div>
@@ -275,6 +312,10 @@
       <div class="client-info">
         <h3 id="clienteNome"></h3>
         <div id="clienteDetalhes" class="client-info-row"></div>
+        <div class="hist-cli" id="clienteHistData" style="display:none">
+          <span class="hist-cli-icon">🕐</span>
+          <span id="clienteHistTexto"></span>
+        </div>
       </div>
     </div>
     <div id="clienteErro" class="alert error" style="display:none;margin-top:10px;">
@@ -287,7 +328,7 @@
   <div class="version-tag" id="versionTag">Carregando dados...</div>
 </div>
 
-<!-- TELA 2: PRAZO -->
+<!-- ═══════════════ TELA 2: PRAZO ═══════════════ -->
 <div class="screen" id="screen2">
   <div class="card">
     <div class="card-title">2. Prazo de Pagamento</div>
@@ -300,7 +341,7 @@
   </div>
 </div>
 
-<!-- TELA 3: PRODUTOS -->
+<!-- ═══════════════ TELA 3: PRODUTOS ═══════════════ -->
 <div class="screen" id="screen3">
   <div class="client-info" id="resumoClienteTopo" style="margin-bottom:12px;">
     <h3 id="resumoNome"></h3>
@@ -325,6 +366,10 @@
         <div class="total-value" id="totFaturamento">—</div>
       </div>
       <div class="total-item">
+        <div class="total-label">Margem Bruta %</div>
+        <div class="total-value" id="totMargemBruta">—</div>
+      </div>
+      <div class="total-item">
         <div class="total-label">Margem Final</div>
         <div class="total-value accent" id="totMargem">—</div>
       </div>
@@ -339,7 +384,7 @@
   <button class="btn-secondary" style="margin-top:8px;" onclick="irParaTela2()">← Alterar Prazo</button>
 </div>
 
-<!-- EXPORT OVERLAY -->
+<!-- ═══════════════ EXPORT OVERLAY ═══════════════ -->
 <div id="exportOverlay">
   <div id="exportDocWrap">
     <div id="exportDoc"></div>
@@ -350,18 +395,36 @@
   </div>
 </div>
 
+<div id="updateToast">
+  <div class="toast-spinner"></div>
+  Atualizando app...
+</div>
+
 <script src="data/data.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  // Quando o novo service worker assume o controle, recarrega automaticamente
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      const toast = document.getElementById('updateToast');
+      if (toast) { toast.style.display = 'flex'; }
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  });
 }
 </script>
 <script>
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
 let clienteAtual = null;
 let prazoAtual   = null;
 let produtos     = [];
 let produtoIdSeq = 0;
 
+// ─── FORMATAÇÃO ──────────────────────────────────────────────────────────────
 const fmt = {
   moeda: v => v == null || isNaN(v) ? '—' : 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
   pct:   v => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1) + '%',
@@ -369,6 +432,7 @@ const fmt = {
   num:   v => v == null || isNaN(v) ? '—' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
 };
 
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   try {
     const tag = document.getElementById('versionTag');
@@ -380,6 +444,7 @@ window.addEventListener('load', () => {
   }
 });
 
+// ─── NAVEGAÇÃO ───────────────────────────────────────────────────────────────
 function setScreen(n) {
   document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i+1 === n));
   ['dot1','dot2','dot3'].forEach((id,i) => {
@@ -419,6 +484,7 @@ function resetAll() {
   setScreen(1);
 }
 
+// ─── TELA 1: CLIENTE ─────────────────────────────────────────────────────────
 let searchTimer = null;
 function buscaCliente(val) {
   clearTimeout(searchTimer);
@@ -472,6 +538,14 @@ function selecionarCliente(cod, c) {
     `<span class="client-badge">${c.ramo}</span>
      <span class="client-badge">${c.imbp}</span>
      <span class="client-badge">${c.segmento}</span>`;
+  // Última compra do cliente
+  const hist = (typeof HIST_CLIENTE !== 'undefined') ? HIST_CLIENTE[cod] : null;
+  const histEl = document.getElementById('clienteHistData');
+  const histTx = document.getElementById('clienteHistTexto');
+  if (histEl && histTx) {
+    if (hist) { histTx.textContent = 'Última compra: ' + hist.data; histEl.style.display = 'flex'; }
+    else { histEl.style.display = 'none'; }
+  }
   document.getElementById('clienteInfo').style.display = 'block';
   document.getElementById('btnProceed1').style.display = 'block';
 }
@@ -483,6 +557,7 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.search-wrap')) document.getElementById('autoList').style.display = 'none';
 });
 
+// ─── TELA 2: PRAZO ───────────────────────────────────────────────────────────
 function renderizarPrazos() {
   if (typeof AUX === 'undefined') return;
   const grid = document.getElementById('prazoGrid');
@@ -512,6 +587,7 @@ function selecionarPrazo(cod, val) {
   document.getElementById('btnProceed2').style.display = 'block';
 }
 
+// ─── TELA 3: PRODUTOS ────────────────────────────────────────────────────────
 function renderizarResumoTopo() {
   if (!clienteAtual) return;
   document.getElementById('resumoNome').textContent = clienteAtual.nome;
@@ -572,6 +648,7 @@ function criarCardProduto(p, num) {
                  min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'preco',this.value)">
         </div>
       </div>
+      <div class="hist-prod" id="pHist_${p.id}"></div>
       <div class="calc-section">
         <div class="calc-grid">
           <div class="calc-item"><div class="calc-label">Volume Total</div><div class="calc-value" id="pVolTotal_${p.id}">${calc.I != null ? fmt.vol(calc.I) : '—'}</div></div>
@@ -582,10 +659,14 @@ function criarCardProduto(p, num) {
         <hr class="separator">
         <div class="calc-grid">
           <div class="calc-item">
+            <div class="calc-label">Margem Bruta %</div>
+            <div class="calc-value" id="pMargemBruta_${p.id}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div>
+          </div>
+          <div class="calc-item">
             <div class="calc-label">Margem Final Pós Premier</div>
             <div class="calc-value ${marginColor}" id="pMargem_${p.id}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
           </div>
-          <div class="calc-item">
+          <div class="calc-item" style="grid-column:1/-1">
             <div class="calc-label">Unitária Final Pós Premier (R$/L)</div>
             <div class="calc-value" id="pUnitaria_${p.id}">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div>
           </div>
@@ -609,11 +690,25 @@ function atualizarDisplayCard(id) {
   const nomeEl = document.getElementById('pNome_' + id);
   if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
-  set('pVolTotal_' + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
-  set('pCustoSpl_' + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
-  set('pDpfLitro_' + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
-  set('pDpfTotal_' + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
-  set('pUnitaria_' + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
+  set('pVolTotal_'    + id, calc.I  != null ? fmt.vol(calc.I)   : '—');
+  set('pCustoSpl_'   + id, calc.J  != null ? fmt.moeda(calc.J) : '—');
+  set('pDpfLitro_'   + id, calc.L  != null ? fmt.moeda(calc.L) : '—');
+  set('pDpfTotal_'   + id, calc.M  != null ? fmt.moeda(calc.M) : '—');
+  set('pMargemBruta_'+ id, calc.AB != null ? fmt.pct(calc.AB)  : '—');
+  set('pUnitaria_'   + id, calc.AE != null ? fmt.num(calc.AE)  : '—');
+  // Histórico do produto para esse cliente
+  const histEl = document.getElementById('pHist_' + id);
+  if (histEl && clienteAtual) {
+    const prodCod = String(p.cod || '').trim();
+    const hist = (typeof HIST_PRODUTO !== 'undefined' && prodCod)
+      ? HIST_PRODUTO[clienteAtual.cod + '|' + prodCod] : null;
+    if (hist) {
+      histEl.innerHTML = `🕐 Último pedido: <strong>${hist.data}</strong> &nbsp;·&nbsp; Preço pago: <strong>${fmt.moeda(hist.preco)}/emb.</strong>`;
+      histEl.style.display = 'block';
+    } else {
+      histEl.style.display = 'none';
+    }
+  }
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
     margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
@@ -622,6 +717,7 @@ function atualizarDisplayCard(id) {
   }
 }
 
+// ─── CÁLCULOS ────────────────────────────────────────────────────────────────
 function calcularLinha(p) {
   const prodCod = String(p.cod || '').trim();
   const qtde    = parseFloat(p.qtde) || 0;
@@ -664,41 +760,45 @@ function calcularLinha(p) {
   const U  = preco * qtde;
   const V  = T * qtde;
   const W  = U - O;
+  const AB = U ? W / U : null;
   const pctFin = prazoAtual ? prazoAtual.val : 0;
   const X  = preco * pctFin;
   const Y  = X * qtde;
   const AA = (V - Q) + Y;
   const AD = V ? ((V + Y) - Q) / V : null;
   const AE = I ? AA / I : null;
-  return { nome, I, J, L, M, AA, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q };
+  return { nome, I, J, L, M, AA, AB, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q, _O: O };
 }
 
 function calcularTotais() {
-  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, linhasValidas=0;
+  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, totalO=0, linhasValidas=0;
   for (const p of produtos) {
     const c = calcularLinha(p);
-    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; linhasValidas++; }
+    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; totalO+=c._O||0; linhasValidas++; }
   }
-  return { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas };
+  return { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas };
 }
 
 function atualizarTotais() {
   const card = document.getElementById('totalsCard');
   if (produtos.length === 0) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
   if (!linhasValidas) {
-    ['totVolume','totFaturamento','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    ['totVolume','totFaturamento','totMargemBruta','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
   }
-  const totMargemAD = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
-  const totUnitAE   = totalI ? totalAA/totalI : null;
+  const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
+  const totMargemAD    = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
+  const totUnitAE      = totalI ? totalAA/totalI : null;
   document.getElementById('totVolume').textContent      = fmt.vol(totalI);
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
+  document.getElementById('totMargemBruta').textContent = fmt.pct(totMargemBruta);
   document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
 
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
 function gerarExport() {
   if (!clienteAtual || produtos.length === 0) return;
 
@@ -722,15 +822,18 @@ function gerarExport() {
           <div><div class="exp-field-label">DPF / Emb.</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
           <div><div class="exp-field-label">DPF Total</div><div class="exp-field-value">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
+          ${(() => { const h = (typeof HIST_PRODUTO!=='undefined'&&clienteAtual) ? HIST_PRODUTO[clienteAtual.cod+'|'+p.cod] : null; return h ? `<div style="grid-column:1/-1"><div class="exp-field-label">Último Pedido</div><div class="exp-field-value">${h.data} &nbsp;·&nbsp; ${fmt.moeda(h.preco)}/emb.</div></div>` : ''; })()}
+          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
           <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}" style="font-size:13px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
           <div><div class="exp-field-label">Unitária Final (R$/L)</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
         </div>
       </div>`;
   });
 
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
   let totaisHtml = '';
   if (linhasValidas) {
+    const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
     const totMargem = totalV ? ((totalV+totalY)-totalQ)/totalV : null;
     const totUnit   = totalI ? totalAA/totalI : null;
     totaisHtml = `
@@ -739,6 +842,7 @@ function gerarExport() {
         <div class="exp-totals-grid">
           <div><div class="exp-total-label">Volume Total</div><div class="exp-total-value">${fmt.vol(totalI)}</div></div>
           <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
+          <div><div class="exp-total-label">Margem Bruta %</div><div class="exp-total-value">${fmt.pct(totMargemBruta)}</div></div>
           <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totMargem)}</div></div>
           <div class="exp-full"><div class="exp-total-label">Unitária Final Pós Premier</div><div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit)+' R$/L' : '—'}</div></div>
         </div>
@@ -763,12 +867,15 @@ function gerarExport() {
     <div class="exp-footer">West Brasil Lubrificantes • Simulador de Margem Unitária</div>
   `;
 
+  // Mostra overlay e ajusta escala para caber tudo na tela
   const overlay = document.getElementById('exportOverlay');
   overlay.classList.add('visible');
 
+  // Reset escala
   const doc = document.getElementById('exportDoc');
   doc.style.zoom = '1';
 
+  // Aguarda renderização e aplica zoom para caber na tela
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const wrap = document.getElementById('exportDocWrap');
     const dispH = wrap.clientHeight - 8;
@@ -781,7 +888,8 @@ function gerarExport() {
 
 function fecharExport() {
   document.getElementById('exportOverlay').classList.remove('visible');
-  document.getElementById('exportDoc').style.zoom = '1';
+  const doc = document.getElementById('exportDoc');
+  doc.style.zoom = '1';
 }
 </script>
 </body>
