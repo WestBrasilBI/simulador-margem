@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -403,9 +403,14 @@
 <script src="data/data.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    // Verifica atualização imediatamente e sempre que o app volta ao foco
+    reg.update();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+  }).catch(() => {});
 
-  // Quando o novo service worker assume o controle, recarrega automaticamente
   let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!refreshing) {
@@ -590,7 +595,7 @@ function selecionarPrazo(cod, val) {
 // ─── TELA 3: PRODUTOS ────────────────────────────────────────────────────────
 function renderizarResumoTopo() {
   if (!clienteAtual) return;
-  document.getElementById('resumoNome').textContent = clienteAtual.nome;
+  document.getElementById('resumoNome').textContent = clienteAtual.cod + ' — ' + clienteAtual.nome;
   document.getElementById('resumoDetalhes').innerHTML =
     `<span class="client-badge">${clienteAtual.ramo}</span>
      <span class="client-badge">${clienteAtual.imbp}</span>
@@ -858,7 +863,7 @@ function gerarExport() {
       </div>
     </div>
     <div class="exp-client">
-      <div class="exp-client-nome">${clienteAtual.nome}</div>
+      <div class="exp-client-nome">${clienteAtual.cod} — ${clienteAtual.nome}</div>
       <div class="exp-client-info">${clienteAtual.ramo} | ${clienteAtual.segmento} | ${clienteAtual.imbp}</div>
       <span class="exp-prazo-badge">Prazo: ${prazoAtual.cod}</span>
     </div>
