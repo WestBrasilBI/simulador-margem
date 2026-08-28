@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0c4976">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Simulador de Margem - Especialidades</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --blue: #0c4976;
+    --blue-light: #1a6aa8;
+    --red: #e02e39;
+    --white: #ffffff;
+    --gray-bg: #f4f6f9;
+    --gray-border: #dde3ea;
+    --gray-text: #6b7a8d;
+    --green: #1d8a4e;
+    --text: #1a2533;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--blue);
+    color: var(--white);
+    padding: 12px 16px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-row { display: flex; align-items: center; gap: 10px; }
+  .logo-wrap { display: flex; align-items: center; flex-shrink: 0; }
+  .logo-text { font-weight: 800; font-size: 18px; color: white; letter-spacing: -0.5px; }
+  .subtitle { font-size: 11px; opacity: 0.75; flex: 1; margin-left: 10px; }
+  .btn-reset {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* STEPS BAR */
+  .steps-bar { background: var(--blue); padding: 0 16px 12px; display: flex; gap: 6px; }
+  .step-dot { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25); transition: background 0.3s; }
+  .step-dot.active { background: var(--white); }
+  .step-dot.done { background: rgba(255,255,255,0.55); }
+
+  /* SCREEN */
+  .screen { display: none; padding: 16px; }
+  .screen.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--white); border-radius: 14px; padding: 20px; box-shadow: var(--card-shadow); margin-bottom: 12px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+  /* FORM ELEMENTS */
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-text); margin-bottom: 5px; }
+  input[type=text], input[type=number], select {
+    width: 100%; border: 1.5px solid var(--gray-border); border-radius: 8px;
+    padding: 11px 12px; font-size: 15px; color: var(--text); background: var(--white);
+    outline: none; transition: border-color 0.2s; -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--blue); }
+  input.error { border-color: var(--red); }
+
+  /* CLIENT SEARCH */
+  .search-wrap { position: relative; }
+  .autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; background: white;
+    border: 1.5px solid var(--blue); border-top: none; border-radius: 0 0 10px 10px;
+    max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+  .autocomplete-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid var(--gray-border); font-size: 13px; }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item:active { background: var(--gray-bg); }
+  .autocomplete-item strong { display: block; color: var(--blue); font-weight: 700; }
+  .autocomplete-item span { color: var(--gray-text); font-size: 12px; }
+
+  /* CLIENT INFO BOX */
+  .client-info {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+    color: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .client-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .client-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+  .client-badge { background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
+
+  /* PRAZO GRID */
+  .prazo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .prazo-btn {
+    border: 1.5px solid var(--gray-border); border-radius: 8px; padding: 10px 4px;
+    text-align: center; cursor: pointer; background: white; font-size: 13px; font-weight: 600;
+    color: var(--text); transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .prazo-btn .pct { font-size: 10px; font-weight: 400; color: var(--gray-text); }
+  .prazo-btn.selected { border-color: var(--blue); background: var(--blue); color: white; }
+  .prazo-btn.selected .pct { color: rgba(255,255,255,0.7); }
+  .prazo-btn.neg .pct { color: var(--red); }
+  .prazo-btn.selected.neg .pct { color: rgba(255,255,255,0.7); }
+
+  /* PRODUCT CARDS */
+  .produto-card { background: var(--white); border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 10px; overflow: hidden; border: 1.5px solid var(--gray-border); }
+  .produto-header { background: var(--blue); color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .produto-num { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .produto-nome-header { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .btn-remove { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 16px; line-height: 1; }
+  .produto-body { padding: 14px; }
+  .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .input-group label { font-size: 11px; font-weight: 600; color: var(--gray-text); margin-bottom: 4px; }
+  .input-group input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: 7px; padding: 9px 10px; font-size: 14px; background: var(--white); outline: none; transition: border-color 0.2s; }
+  .input-group input:focus { border-color: var(--blue); }
+  .calc-section { background: var(--gray-bg); border-radius: 8px; padding: 12px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; }
+  .calc-value { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .calc-value.highlight { color: var(--blue); font-size: 15px; }
+  .calc-value.green { color: var(--green); }
+  .calc-value.red { color: var(--red); }
+  .separator { border: none; border-top: 1px solid var(--gray-border); margin: 10px 0; }
+
+  /* TOTALS */
+  .totals-card { background: var(--blue); color: white; border-radius: 14px; padding: 18px; margin-top: 4px; }
+  .totals-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; opacity: 0.8; }
+  .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .total-label { font-size: 10px; font-weight: 600; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.3px; }
+  .total-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .total-value.accent { color: #ffd166; }
+  .total-item.full { grid-column: 1 / -1; }
+
+  /* BUTTONS */
+  .btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--blue-light); }
+  .btn-secondary { width: 100%; background: transparent; color: var(--blue); border: 1.5px solid var(--blue); border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .btn-add { width: 100%; background: white; color: var(--blue); border: 2px dashed var(--blue); border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; }
+  .btn-add:active { background: var(--gray-bg); }
+  .btn-add-icon { font-size: 22px; font-weight: 400; }
+  .btn-export { width: 100%; background: var(--red); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* ALERTS */
+  .alert { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #7c5700; margin-bottom: 10px; }
+  .alert.error { background: #fdecea; border-color: var(--red); color: #9b1a20; }
+
+  /* VERSION */
+  .version-tag { text-align: center; font-size: 11px; color: var(--gray-text); padding: 12px; }
+
+  /* HISTÓRICO */
+  .hist-cli { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+  .hist-cli-icon { font-size: 13px; }
+  .hist-prod { background: #eef4fb; border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: var(--gray-text); display: none; }
+  .hist-prod strong { color: var(--blue); font-weight: 700; }
+
+  /* PRAZO DISPLAY */
+  .prazo-display { background: var(--gray-bg); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--gray-text); }
+  .prazo-display strong { color: var(--text); }
+
+  /* ═══ EXPORT OVERLAY ════════════════════════════════════════ */
+  #exportOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 300;
+    flex-direction: column;
+  }
+  #exportOverlay.visible { display: flex; }
+
+  #exportDocWrap {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 8px 8px 0;
+  }
+
+  #exportDoc {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    transform-origin: top center;
+  }
+
+  .exp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--blue);
+    margin-bottom: 10px;
+  }
+  .exp-logo { font-weight: 800; font-size: 15px; color: var(--blue); }
+  .exp-header-right { text-align: right; }
+  .exp-title { font-size: 10px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
+  .exp-date { font-size: 10px; color: var(--gray-text); margin-top: 1px; }
+
+  .exp-client { background: var(--gray-bg); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+  .exp-client-nome { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .exp-client-info { font-size: 10px; color: var(--gray-text); margin-bottom: 4px; }
+  .exp-prazo-badge { display: inline-block; background: var(--blue); color: white; border-radius: 4px; padding: 1px 8px; font-size: 10px; font-weight: 700; }
+
+  .exp-product { border: 1px solid var(--gray-border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+  .exp-product-hdr { background: var(--blue); color: white; padding: 5px 10px; font-size: 10px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-product-body { padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .exp-field-label { font-size: 8px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
+  .exp-field-value { font-size: 11px; font-weight: 600; color: var(--text); }
+  .exp-field-value.green { color: var(--green); }
+  .exp-field-value.red { color: var(--red); }
+  .exp-field-value.blue { color: var(--blue); }
+
+  .exp-totals { background: var(--blue); color: white; border-radius: 8px; padding: 10px; margin-top: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-totals-title { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .exp-total-label { font-size: 8px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
+  .exp-total-value { font-size: 13px; font-weight: 700; margin-top: 1px; }
+  .exp-total-value.accent { color: #ffd166; }
+  .exp-full { grid-column: 1/-1; }
+
+  .exp-footer { font-size: 8px; color: var(--gray-text); text-align: center; margin-top: 8px; }
+
+  /* Bottom bar */
+  .export-bar {
+    background: white;
+    border-top: 1px solid var(--gray-border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .export-bar-hint { font-size: 12px; color: var(--gray-text); }
+  .export-bar-hint strong { color: var(--text); }
+  .btn-fechar { background: var(--gray-bg); border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; }
+
+  /* UPDATE TOAST */
+  #updateToast {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: white;
+    border-radius: 24px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  .toast-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="logo-wrap">
+      <span class="logo-text">West Brasil</span>
+    </div>
+    <div class="subtitle">Simulador de Margem - Especialidades</div>
+    <button class="btn-reset" onclick="resetAll()">↺ Novo</button>
+  </div>
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+</header>
+
+<!-- ═══════════════ TELA 1: CLIENTE ═══════════════ -->
+<div class="screen active" id="screen1">
+  <div class="card">
+    <div class="card-title">1. Identificação do Cliente</div>
+    <div class="search-wrap">
+      <label for="inputCliente">Código ou nome do cliente</label>
+      <input type="text" id="inputCliente" placeholder="Ex: 3657 ou G-KT Brasil..."
+             autocomplete="off" inputmode="text"
+             oninput="buscaCliente(this.value)" onkeydown="navegarLista(event)">
+      <div class="autocomplete-list" id="autoList" style="display:none"></div>
+    </div>
+    <div id="clienteInfo" style="display:none; margin-top:14px;">
+      <div class="client-info">
+        <h3 id="clienteNome"></h3>
+        <div id="clienteDetalhes" class="client-info-row"></div>
+        <div class="hist-cli" id="clienteHistData" style="display:none">
+          <span class="hist-cli-icon">🕐</span>
+          <span id="clienteHistTexto"></span>
+        </div>
+      </div>
+    </div>
+    <div id="clienteErro" class="alert error" style="display:none;margin-top:10px;">
+      Cliente não encontrado. Verifique o código.
+    </div>
+    <button class="btn-primary" id="btnProceed1" onclick="irParaTela2()" style="display:none">
+      Próximo: Prazo de Pagamento →
+    </button>
+  </div>
+  <div class="version-tag" id="versionTag">Carregando dados...</div>
+</div>
+
+<!-- ═══════════════ TELA 2: PRAZO ═══════════════ -->
+<div class="screen" id="screen2">
+  <div class="card">
+    <div class="card-title">2. Prazo de Pagamento</div>
+    <div class="prazo-grid" id="prazoGrid"></div>
+    <div class="prazo-display" id="prazoDisplay">Selecione um prazo acima</div>
+    <button class="btn-primary" id="btnProceed2" onclick="irParaTela3()" style="display:none">
+      Simular Produtos →
+    </button>
+    <button class="btn-secondary" onclick="irParaTela1()">← Voltar</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TELA 3: PRODUTOS ═══════════════ -->
+<div class="screen" id="screen3">
+  <div class="client-info" id="resumoClienteTopo" style="margin-bottom:12px;">
+    <h3 id="resumoNome"></h3>
+    <div id="resumoDetalhes" class="client-info-row"></div>
+  </div>
+
+  <div id="produtosList"></div>
+
+  <button class="btn-add" onclick="adicionarProduto()">
+    <span class="btn-add-icon">+</span> Adicionar Produto
+  </button>
+
+  <div class="totals-card" id="totalsCard" style="display:none; margin-top:16px;">
+    <div class="totals-title">Resumo da Simulação</div>
+    <div class="totals-grid">
+      <div class="total-item">
+        <div class="total-label">Qtde Total (Emb.)</div>
+        <div class="total-value" id="totQtde">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Faturamento Total</div>
+        <div class="total-value" id="totFaturamento">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Margem Bruta %</div>
+        <div class="total-value" id="totMargemBruta">—</div>
+      </div>
+      <div class="total-item full">
+        <div class="total-label">Margem Final</div>
+        <div class="total-value accent" id="totMargem">—</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-export" onclick="gerarExport()">↗ Compartilhar Simulação</button>
+  <button class="btn-secondary" style="margin-top:8px;" onclick="irParaTela2()">← Alterar Prazo</button>
+</div>
+
+<!-- ═══════════════ EXPORT OVERLAY ═══════════════ -->
+<div id="exportOverlay">
+  <div id="exportDocWrap">
+    <div id="exportDoc"></div>
+  </div>
+  <div class="export-bar">
+    <div class="export-bar-hint">📸 Tire um <strong>print</strong> da tela</div>
+    <button class="btn-fechar" onclick="fecharExport()">✕ Fechar</button>
+  </div>
+</div>
+
+<div id="updateToast">
+  <div class="toast-spinner"></div>
+  Atualizando app...
+</div>
+
+<script src="data/data.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    reg.update();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+  }).catch(() => {});
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      const toast = document.getElementById('updateToast');
+      if (toast) { toast.style.display = 'flex'; }
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  });
+}
+</script>
+<script>
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let clienteAtual = null;
+let prazoAtual   = null;
+let produtos     = [];
+let produtoIdSeq = 0;
+
+// ─── FORMATAÇÃO ──────────────────────────────────────────────────────────────
+const fmt = {
+  moeda: v => v == null || isNaN(v) ? '—' : 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
+  pct:   v => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1) + '%',
+  num:   v => v == null || isNaN(v) ? '—' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  try {
+    const tag = document.getElementById('versionTag');
+    if (typeof DATA_VERSION !== 'undefined') tag.textContent = 'Dados de: ' + DATA_VERSION;
+    else tag.textContent = 'Dados carregados';
+    renderizarPrazos();
+  } catch(e) {
+    document.getElementById('versionTag').textContent = 'Erro ao carregar dados';
+  }
+});
+
+// ─── NAVEGAÇÃO ───────────────────────────────────────────────────────────────
+function setScreen(n) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i+1 === n));
+  ['dot1','dot2','dot3'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-dot' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
+  });
+  window.scrollTo(0,0);
+}
+
+function irParaTela1() { setScreen(1); }
+function irParaTela2() { if (!clienteAtual) return; setScreen(2); }
+
+function irParaTela3() {
+  if (!prazoAtual) return;
+  setScreen(3);
+  renderizarResumoTopo();
+  if (produtos.length === 0) {
+    adicionarProduto();
+  } else {
+    produtos.forEach(p => atualizarDisplayCard(p.id));
+    atualizarTotais();
+  }
+}
+
+function resetAll() {
+  clienteAtual = null; prazoAtual = null; produtos = []; produtoIdSeq = 0;
+  document.getElementById('inputCliente').value = '';
+  document.getElementById('clienteInfo').style.display = 'none';
+  document.getElementById('clienteErro').style.display = 'none';
+  document.getElementById('btnProceed1').style.display = 'none';
+  document.getElementById('autoList').style.display = 'none';
+  document.querySelectorAll('.prazo-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('prazoDisplay').textContent = 'Selecione um prazo acima';
+  document.getElementById('btnProceed2').style.display = 'none';
+  document.getElementById('produtosList').innerHTML = '';
+  document.getElementById('totalsCard').style.display = 'none';
+  setScreen(1);
+}
+
+// ─── TELA 1: CLIENTE ─────────────────────────────────────────────────────────
+let searchTimer = null;
+function buscaCliente(val) {
+  clearTimeout(searchTimer);
+  document.getElementById('clienteErro').style.display = 'none';
+  document.getElementById('clienteInfo').style.display = 'none';
+  document.getElementById('btnProceed1').style.display = 'none';
+  clienteAtual = null;
+  const v = val.trim();
+  if (!v) { document.getElementById('autoList').style.display = 'none'; return; }
+  if (/^\d+$/.test(v) && CLIENTES[v]) {
+    selecionarCliente(v, CLIENTES[v]);
+    document.getElementById('autoList').style.display = 'none';
+    return;
+  }
+  searchTimer = setTimeout(() => {
+    if (v.length < 3) { document.getElementById('autoList').style.display = 'none'; return; }
+    const vLow = v.toLowerCase();
+    const matches = [];
+    for (const [cod, c] of Object.entries(CLIENTES)) {
+      if (c.nome.toLowerCase().includes(vLow) || cod.includes(v)) {
+        matches.push({ cod, ...c });
+        if (matches.length >= 20) break;
+      }
+    }
+    renderizarAutocomplete(matches);
+  }, 300);
+}
+
+function renderizarAutocomplete(matches) {
+  const list = document.getElementById('autoList');
+  if (!matches.length) { list.style.display = 'none'; return; }
+  list.innerHTML = matches.map(m =>
+    `<div class="autocomplete-item" onclick="selecionarClienteItem('${m.cod}')">
+      <strong>${m.cod} — ${m.nome}</strong>
+      <span>${m.ramo} | ${m.segmento}</span>
+    </div>`
+  ).join('');
+  list.style.display = 'block';
+}
+
+function selecionarClienteItem(cod) {
+  document.getElementById('inputCliente').value = cod + ' — ' + CLIENTES[cod].nome;
+  document.getElementById('autoList').style.display = 'none';
+  selecionarCliente(cod, CLIENTES[cod]);
+}
+
+function selecionarCliente(cod, c) {
+  clienteAtual = { cod, ...c };
+  document.getElementById('clienteNome').textContent = c.nome;
+  document.getElementById('clienteDetalhes').innerHTML =
+    `<span class="client-badge">${c.ramo}</span>
+     <span class="client-badge">${c.segmento}</span>`;
+  const hist = (typeof HIST_CLIENTE !== 'undefined') ? HIST_CLIENTE[cod] : null;
+  const histEl = document.getElementById('clienteHistData');
+  const histTx = document.getElementById('clienteHistTexto');
+  if (histEl && histTx) {
+    if (hist) { histTx.textContent = 'Última compra: ' + hist.data; histEl.style.display = 'flex'; }
+    else { histEl.style.display = 'none'; }
+  }
+  document.getElementById('clienteInfo').style.display = 'block';
+  document.getElementById('btnProceed1').style.display = 'block';
+}
+
+function navegarLista(e) {
+  if (e.key === 'Escape') document.getElementById('autoList').style.display = 'none';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) document.getElementById('autoList').style.display = 'none';
+});
+
+// ─── TELA 2: PRAZO ───────────────────────────────────────────────────────────
+function renderizarPrazos() {
+  if (typeof AUX === 'undefined') return;
+  const grid = document.getElementById('prazoGrid');
+  const labels = {
+    A1:'À Vista',C0:'C/0',C1:'C/1',C2:'C/2',C3:'C/3',C4:'C/4',C5:'C/5',
+    C6:'C/6',C7:'C/7',E1:'E/1',E2:'E/2',E3:'E/3',E4:'E/4',E5:'E/5',E6:'E/6',
+    L1:'L/1',L2:'L/2',L3:'L/3',L4:'L/4',L5:'L/5',L6:'L/6',
+    S3:'S/3',S4:'S/4',S5:'S/5',S6:'S/6',S7:'S/7',S8:'S/8',S9:'S/9',
+  };
+  grid.innerHTML = Object.entries(AUX).map(([k, v]) => {
+    const pctStr = v >= 0 ? '+' + (v*100).toFixed(1) + '%' : (v*100).toFixed(1) + '%';
+    const isNeg = v < 0;
+    return `<button class="prazo-btn${isNeg?' neg':''}" id="prazo_${k}" onclick="selecionarPrazo('${k}', ${v})">
+      ${labels[k] || k}<span class="pct">${pctStr}</span>
+    </button>`;
+  }).join('');
+}
+
+function selecionarPrazo(cod, val) {
+  prazoAtual = { cod, val };
+  document.querySelectorAll('.prazo-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('prazo_' + cod).classList.add('selected');
+  const desc = val >= 0
+    ? `Acréscimo financeiro de <strong>+${(val*100).toFixed(1)}%</strong>`
+    : `Desconto financeiro de <strong>${(val*100).toFixed(1)}%</strong> sobre o preço de venda`;
+  document.getElementById('prazoDisplay').innerHTML = `Prazo <strong>${cod}</strong> selecionado — ${desc}`;
+  document.getElementById('btnProceed2').style.display = 'block';
+}
+
+// ─── TELA 3: PRODUTOS ────────────────────────────────────────────────────────
+function renderizarResumoTopo() {
+  if (!clienteAtual) return;
+  document.getElementById('resumoNome').textContent = clienteAtual.cod + ' — ' + clienteAtual.nome;
+  document.getElementById('resumoDetalhes').innerHTML =
+    `<span class="client-badge">${clienteAtual.ramo}</span>
+     <span class="client-badge">Prazo: ${prazoAtual.cod}</span>`;
+}
+
+function adicionarProduto() {
+  const id = ++produtoIdSeq;
+  produtos.push({ id, cod:'', qtde:'', dpf:'0', preco:'' });
+  renderizarProdutos();
+  atualizarTotais();
+  setTimeout(() => { const el = document.getElementById('pCod_' + id); if (el) el.focus(); }, 100);
+}
+
+function removerProduto(id) {
+  produtos = produtos.filter(p => p.id !== id);
+  renderizarProdutos();
+  atualizarTotais();
+}
+
+function renderizarProdutos() {
+  document.getElementById('produtosList').innerHTML = produtos.map((p, idx) => criarCardProduto(p, idx+1)).join('');
+}
+
+function criarCardProduto(p, num) {
+  const calc = calcularLinha(p);
+  const nomeExibir = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
+  const marginColor = calc.AD != null && !isNaN(calc.AD) ? (calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red') : '';
+  return `<div class="produto-card" id="card_${p.id}">
+    <div class="produto-header">
+      <span class="produto-num">#${num}</span>
+      <span class="produto-nome-header" id="pNome_${p.id}">${nomeExibir}</span>
+      <button class="btn-remove" onclick="removerProduto(${p.id})">×</button>
+    </div>
+    <div class="produto-body">
+      <div class="inputs-row">
+        <div class="input-group" style="grid-column:1/-1">
+          <label>CÓD. PRODUTO</label>
+          <input type="text" id="pCod_${p.id}" value="${p.cod}" placeholder="Ex: 124699"
+                 inputmode="numeric" oninput="atualizarCampo(${p.id},'cod',this.value)">
+        </div>
+        <div class="input-group">
+          <label>QTDE (Embalagens)</label>
+          <input type="number" id="pQtde_${p.id}" value="${p.qtde}" placeholder="0"
+                 min="0" step="1" inputmode="decimal" oninput="atualizarCampo(${p.id},'qtde',this.value)">
+        </div>
+        <div class="input-group">
+          <label>DPF / EMBALAGEM (R$)</label>
+          <input type="number" id="pDpf_${p.id}" value="${p.dpf}" placeholder="0"
+                 min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'dpf',this.value)">
+        </div>
+        <div class="input-group" style="grid-column:1/-1">
+          <label>PREÇO VENDA FATURADO (R$ / embalagem)</label>
+          <input type="number" id="pPreco_${p.id}" value="${p.preco}" placeholder="0.00"
+                 min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'preco',this.value)">
+        </div>
+      </div>
+      <div class="hist-prod" id="pHist_${p.id}"></div>
+      <div class="calc-section">
+        <div class="calc-grid">
+          <div class="calc-item"><div class="calc-label">Custo Total / Emb.</div><div class="calc-value" id="pCustoSpl_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">Preço Sugerido</div><div class="calc-value" id="pPrecoSug_${p.id}">${calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">DPF Total</div><div class="calc-value" id="pDpfTotal_${p.id}">${calc.M != null ? fmt.moeda(calc.M) : '—'}</div></div>
+          <div class="calc-item"><div class="calc-label">Faturamento</div><div class="calc-value" id="pFatur_${p.id}">${calc._U != null ? fmt.moeda(calc._U) : '—'}</div></div>
+        </div>
+        <hr class="separator">
+        <div class="calc-grid">
+          <div class="calc-item">
+            <div class="calc-label">Margem Bruta %</div>
+            <div class="calc-value" id="pMargemBruta_${p.id}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-label">Margem Final</div>
+            <div class="calc-value ${marginColor}" id="pMargem_${p.id}" style="font-size:16px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function atualizarCampo(id, campo, valor) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  p[campo] = valor;
+  requestAnimationFrame(() => { atualizarDisplayCard(id); atualizarTotais(); });
+}
+
+function atualizarDisplayCard(id) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  const calc = calcularLinha(p);
+  const nomeEl = document.getElementById('pNome_' + id);
+  if (nomeEl) nomeEl.textContent = calc.nome || (p.cod ? 'Produto não encontrado' : 'Informe o código');
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
+  set('pCustoSpl_'   + id, calc.J     != null ? fmt.moeda(calc.J)     : '—');
+  set('pPrecoSug_'   + id, calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—');
+  set('pDpfTotal_'   + id, calc.M     != null ? fmt.moeda(calc.M)     : '—');
+  set('pFatur_'      + id, calc._U    != null ? fmt.moeda(calc._U)    : '—');
+  set('pMargemBruta_'+ id, calc.AB    != null ? fmt.pct(calc.AB)      : '—');
+  // Histórico do produto para esse cliente
+  const histEl = document.getElementById('pHist_' + id);
+  if (histEl && clienteAtual) {
+    const prodCod = String(p.cod || '').trim();
+    const hist = (typeof HIST_PRODUTO !== 'undefined' && prodCod)
+      ? HIST_PRODUTO[clienteAtual.cod + '|' + prodCod] : null;
+    if (hist) {
+      histEl.innerHTML = `🕐 Último pedido: <strong>${hist.data}</strong> &nbsp;·&nbsp; Preço pago: <strong>${fmt.moeda(hist.preco)}/emb.</strong>`;
+      histEl.style.display = 'block';
+    } else {
+      histEl.style.display = 'none';
+    }
+  }
+  const margemEl = document.getElementById('pMargem_' + id);
+  if (margemEl) {
+    margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
+    margemEl.className = 'calc-value ' + (calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red');
+    margemEl.style.fontSize = '16px';
+  }
+}
+
+// ─── CÁLCULOS ────────────────────────────────────────────────────────────────
+function calcularLinha(p) {
+  const prodCod = String(p.cod || '').trim();
+  const qtde    = parseFloat(p.qtde) || 0;
+  const dpfEmb  = parseFloat(p.dpf)  || 0;
+  const preco   = parseFloat(p.preco) || 0;
+  if (!prodCod || !clienteAtual) return {};
+
+  const ramo_cod = clienteAtual.ramo_cod || "";
+  const nomeProd = (typeof NOMES_PRODUTO !== 'undefined') ? NOMES_PRODUTO[prodCod] || null : null;
+
+  const key      = prodCod + "|" + ramo_cod;
+  const keyGeral = prodCod + "|geral";
+  const custoEntry = CUSTO[key] || CUSTO[keyGeral];
+
+  const J         = custoEntry ? custoEntry.custo      : null;
+  const precoSug  = custoEntry ? custoEntry.preco_lista : null;
+  const nome      = custoEntry ? custoEntry.nome        : nomeProd;
+  if (J == null) return { nome };
+
+  const N  = J - dpfEmb;        // custo líquido / emb
+  const O  = N * qtde;          // custo total
+  const M  = dpfEmb * qtde;     // DPF total
+
+  const T  = preco * 0.9075;    // preço NF
+  const U  = preco * qtde;      // faturamento bruto
+  const V  = T * qtde;          // faturamento NF
+  const W  = U - O;             // MB bruta
+  const AB = U ? W / U : null;  // margem bruta %
+
+  const pctFin = prazoAtual ? prazoAtual.val : 0;
+  const X  = preco * pctFin;
+  const Y  = X * qtde;          // ajuste financeiro
+
+  const Q  = N * 0.9075 * qtde; // custo NF
+  const AA = (V - Q) + Y;
+  const AD = V ? ((V + Y) - Q) / V : null;  // margem final
+
+  return { nome, J, precoSug, M, AB, AD, _U: U, _V: V, _AA: AA, _Y: Y, _Q: Q, _O: O, _qtde: qtde };
+}
+
+function calcularTotais() {
+  let totalQtde=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalO=0, linhasValidas=0;
+  for (const p of produtos) {
+    const c = calcularLinha(p);
+    if (c._U) {
+      totalQtde += c._qtde || 0;
+      totalU    += c._U || 0;
+      totalV    += c._V || 0;
+      totalY    += c._Y || 0;
+      totalQ    += c._Q || 0;
+      totalO    += c._O || 0;
+      linhasValidas++;
+    }
+  }
+  return { totalQtde, totalU, totalV, totalY, totalQ, totalO, linhasValidas };
+}
+
+function atualizarTotais() {
+  const card = document.getElementById('totalsCard');
+  if (produtos.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const { totalQtde, totalU, totalV, totalY, totalQ, totalO, linhasValidas } = calcularTotais();
+  if (!linhasValidas) {
+    ['totQtde','totFaturamento','totMargemBruta','totMargem'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    return;
+  }
+  const totMB  = totalU ? (totalU - totalO) / totalU : null;
+  const totAD  = totalV ? ((totalV + totalY) - totalQ) / totalV : null;
+  document.getElementById('totQtde').textContent        = totalQtde.toLocaleString('pt-BR') + ' emb.';
+  document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
+  document.getElementById('totMargemBruta').textContent = fmt.pct(totMB);
+  document.getElementById('totMargem').textContent      = fmt.pct(totAD);
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
+function gerarExport() {
+  if (!clienteAtual || produtos.length === 0) return;
+
+  const now = new Date().toLocaleDateString('pt-BR', {
+    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+
+  let produtosHtml = '';
+  produtos.forEach((p, idx) => {
+    if (!p.cod) return;
+    const calc = calcularLinha(p);
+    const nome = calc.nome || ('Produto ' + p.cod);
+    const margemClass = calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'blue' : 'red';
+    produtosHtml += `
+      <div class="exp-product">
+        <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
+        <div class="exp-product-body">
+          <div><div class="exp-field-label">Qtde (Emb.)</div><div class="exp-field-value">${p.qtde||'—'}</div></div>
+          <div><div class="exp-field-label">Preço Sugerido</div><div class="exp-field-value">${calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—'}</div></div>
+          <div><div class="exp-field-label">Custo Total / Emb.</div><div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
+          <div><div class="exp-field-label">DPF / Emb.</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.dpf)||0)}</div></div>
+          <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
+          <div><div class="exp-field-label">Faturamento</div><div class="exp-field-value">${calc._U != null ? fmt.moeda(calc._U) : '—'}</div></div>
+          ${(() => { const h = (typeof HIST_PRODUTO!=='undefined'&&clienteAtual) ? HIST_PRODUTO[clienteAtual.cod+'|'+p.cod] : null; return h ? `<div style="grid-column:1/-1"><div class="exp-field-label">Último Pedido</div><div class="exp-field-value">${h.data} &nbsp;·&nbsp; ${fmt.moeda(h.preco)}/emb.</div></div>` : ''; })()}
+          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
+          <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}" style="font-size:13px">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
+        </div>
+      </div>`;
+  });
+
+  const { totalQtde, totalU, totalV, totalY, totalQ, totalO, linhasValidas } = calcularTotais();
+  let totaisHtml = '';
+  if (linhasValidas) {
+    const totMB = totalU ? (totalU - totalO) / totalU : null;
+    const totAD = totalV ? ((totalV + totalY) - totalQ) / totalV : null;
+    totaisHtml = `
+      <div class="exp-totals">
+        <div class="exp-totals-title">Resumo Total</div>
+        <div class="exp-totals-grid">
+          <div><div class="exp-total-label">Qtde Total</div><div class="exp-total-value">${totalQtde} emb.</div></div>
+          <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
+          <div><div class="exp-total-label">Margem Bruta %</div><div class="exp-total-value">${fmt.pct(totMB)}</div></div>
+          <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totAD)}</div></div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('exportDoc').innerHTML = `
+    <div class="exp-header">
+      <div class="exp-logo">West Brasil</div>
+      <div class="exp-header-right">
+        <div class="exp-title">Simulação de Margem - Especialidades</div>
+        <div class="exp-date">${now}</div>
+      </div>
+    </div>
+    <div class="exp-client">
+      <div class="exp-client-nome">${clienteAtual.cod} — ${clienteAtual.nome}</div>
+      <div class="exp-client-info">${clienteAtual.ramo} | ${clienteAtual.segmento}</div>
+      <span class="exp-prazo-badge">Prazo: ${prazoAtual.cod}</span>
+    </div>
+    ${produtosHtml}
+    ${totaisHtml}
+    <div class="exp-footer">West Brasil Lubrificantes • Simulador de Margem - Especialidades</div>
+  `;
+
+  const overlay = document.getElementById('exportOverlay');
+  overlay.classList.add('visible');
+
+  const doc = document.getElementById('exportDoc');
+  doc.style.zoom = '1';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const wrap = document.getElementById('exportDocWrap');
+    const dispH = wrap.clientHeight - 8;
+    const docH  = doc.scrollHeight;
+    if (docH > dispH) {
+      doc.style.zoom = String((dispH / docH).toFixed(4));
+    }
+  }));
+}
+
+function fecharExport() {
+  document.getElementById('exportOverlay').classList.remove('visible');
+  const doc = document.getElementById('exportDoc');
+  doc.style.zoom = '1';
+}
+</script>
+</body>
+</html>
