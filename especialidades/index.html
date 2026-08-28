@@ -170,6 +170,15 @@
   }
   .toast-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BONIFICAÇÃO */
+  .bonif-card { background: var(--white); border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 8px; overflow: hidden; border: 1.5px solid #f5c842; }
+  .bonif-header { background: #b86e00; color: white; padding: 7px 12px; display: flex; align-items: center; gap: 7px; }
+  .bonif-badge { background: rgba(255,255,255,0.25); border-radius: 20px; padding: 1px 7px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .btn-bonif { width: 100%; background: #fffbeb; color: #b86e00; border: 2px dashed #c47f0a; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  /* Export sections */
+  .exp-section-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-text); padding: 5px 0 3px; border-bottom: 1px solid var(--gray-border); margin-bottom: 4px; margin-top: 8px; }
+  .exp-bonif-hdr { background: #b86e00; color: white; padding: 5px 10px; font-size: 10px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 </style>
 </head>
 <body>
@@ -240,12 +249,22 @@
         <div class="total-label">Faturamento Total</div>
         <div class="total-value" id="totFaturamento">—</div>
       </div>
+      <div id="totBonifRow" style="display:none; grid-column:1/-1">
+        <div class="total-label">Custo Bonificação</div>
+        <div class="total-value" id="totBonifCusto" style="color:#ffc947">—</div>
+      </div>
       <div style="grid-column:1/-1">
-        <div class="total-label">Margem Bruta %</div>
+        <div class="total-label">Margem Bruta % (c/ bonif.)</div>
         <div class="total-value accent" id="totMargem">—</div>
       </div>
     </div>
   </div>
+
+  <div id="bonificacoesList"></div>
+
+  <button class="btn-bonif" onclick="adicionarBonificacao()">
+    <span class="btn-add-icon">+</span> Adicionar Bonificação
+  </button>
 
   <button class="btn-export" onclick="gerarExport()">↗ Compartilhar Simulação</button>
   <button class="btn-secondary" style="margin-top:8px;" onclick="irParaTela1()">← Voltar</button>
@@ -286,9 +305,11 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
-let clienteAtual = null;
-let produtos     = [];
-let produtoIdSeq = 0;
+let clienteAtual     = null;
+let produtos         = [];
+let produtoIdSeq     = 0;
+let bonificacoes     = [];
+let bonificacaoIdSeq = 0;
 
 const fmt = {
   moeda: v => v == null || isNaN(v) ? '—' : 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
@@ -327,13 +348,14 @@ function irParaTela2() {
 }
 
 function resetAll() {
-  clienteAtual = null; produtos = []; produtoIdSeq = 0;
+  clienteAtual = null; produtos = []; produtoIdSeq = 0; bonificacoes = []; bonificacaoIdSeq = 0;
   document.getElementById('inputCliente').value = '';
   document.getElementById('clienteInfo').style.display = 'none';
   document.getElementById('clienteErro').style.display = 'none';
   document.getElementById('btnProceed1').style.display = 'none';
   document.getElementById('autoListCli').style.display = 'none';
   document.getElementById('produtosList').innerHTML = '';
+  document.getElementById('bonificacoesList').innerHTML = '';
   document.getElementById('totalsCard').style.display = 'none';
   setScreen(1);
 }
@@ -401,16 +423,19 @@ function navegarListaCli(e) {
   if (e.key === 'Escape') document.getElementById('autoListCli').style.display = 'none';
 }
 document.addEventListener('mousedown', e => {
-  // Clique em item de produto (autocomplete)
   const item = e.target.closest('.autocomplete-item');
-  if (item && item.closest('.prod-autocomplete')) {
-    e.preventDefault();
+  if (item) {
     const autoEl = item.closest('.prod-autocomplete');
-    const pid = autoEl._pid;
-    selecionarProdutoItem(pid, item.dataset.cod, item.dataset.nome);
-    return;
+    if (autoEl) {
+      e.preventDefault();
+      if (autoEl._pid != null) {
+        selecionarProdutoItem(autoEl._pid, item.dataset.cod, item.dataset.nome);
+      } else if (autoEl._bid != null) {
+        selecionarBonificacaoItem(autoEl._bid, item.dataset.cod, item.dataset.nome);
+      }
+      return;
+    }
   }
-  // Fechar dropdowns ao clicar fora
   if (!e.target.closest('.search-wrap')) {
     document.getElementById('autoListCli').style.display = 'none';
     document.querySelectorAll('.prod-autocomplete').forEach(el => el.style.display = 'none');
@@ -530,6 +555,133 @@ function selecionarProdutoItem(id, cod, nome) {
   atualizarTotais();
 }
 
+// ─── BONIFICAÇÃO ─────────────────────────────────────────────────────────────
+function adicionarBonificacao() {
+  const id = ++bonificacaoIdSeq;
+  bonificacoes.push({ id, cod:'', nome:'', qtde:'' });
+  renderizarBonificacoes();
+  atualizarTotais();
+  setTimeout(() => { const el = document.getElementById('bBusca_' + id); if (el) el.focus(); }, 100);
+}
+
+function removerBonificacao(id) {
+  bonificacoes = bonificacoes.filter(b => b.id !== id);
+  renderizarBonificacoes();
+  atualizarTotais();
+}
+
+function renderizarBonificacoes() {
+  document.getElementById('bonificacoesList').innerHTML = bonificacoes.map((b, idx) => criarCardBonificacao(b, idx+1)).join('');
+}
+
+function criarCardBonificacao(b, num) {
+  const prodCod = String(b.cod || '').trim();
+  const qtde = parseFloat(b.qtde) || 0;
+  let custoEmb = null, custoTotal = null;
+  if (prodCod && clienteAtual) {
+    const ramo_cod = clienteAtual.ramo_cod || "";
+    const entry = CUSTO[prodCod + "|" + ramo_cod] || CUSTO[prodCod + "|geral"];
+    if (entry) { custoEmb = entry.custo; custoTotal = custoEmb * qtde; }
+  }
+  const nomeExibir = b.nome || (b.cod ? 'Produto não encontrado' : 'Informe o produto');
+  return `<div class="bonif-card" id="bcard_${b.id}">
+    <div class="bonif-header">
+      <span class="bonif-badge">BONIF. #${num}</span>
+      <span class="produto-nome-header" id="bNome_${b.id}">${nomeExibir}</span>
+      <button class="btn-remove" onclick="removerBonificacao(${b.id})">×</button>
+    </div>
+    <div class="produto-body">
+      <div class="input-group search-wrap">
+        <label>PRODUTO (código ou nome)</label>
+        <input type="text" id="bBusca_${b.id}" value="${b.cod ? b.cod + (b.nome ? ' — ' + b.nome : '') : ''}"
+               placeholder="Ex: 124699 ou ADITECH..."
+               autocomplete="off"
+               oninput="buscaBonificacao(${b.id}, this.value)"
+               onkeydown="if(event.key==='Escape') document.getElementById('bAuto_${b.id}').style.display='none'">
+        <div class="autocomplete-list prod-autocomplete" id="bAuto_${b.id}" style="display:none"></div>
+      </div>
+      <div class="input-group">
+        <label>QTDE (Emb.)</label>
+        <input type="number" id="bQtde_${b.id}" value="${b.qtde}" placeholder="0"
+               min="0" step="1" inputmode="decimal" oninput="atualizarCampoBonif(${b.id},'qtde',this.value)">
+      </div>
+      <div class="calc-section">
+        <div class="calc-row">
+          <div class="calc-item-inline"><span class="calc-label">Custo/Emb.:</span><span class="calc-value" id="bCusto_${b.id}">${custoEmb != null ? fmt.moeda(custoEmb) : '—'}</span></div>
+          <div class="calc-item-inline"><span class="calc-label">Custo Total:</span><span class="calc-value red" id="bCustoTot_${b.id}">${custoTotal != null ? fmt.moeda(custoTotal) : '—'}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+let searchTimerBonif = {};
+function buscaBonificacao(id, val) {
+  clearTimeout(searchTimerBonif[id]);
+  const b = bonificacoes.find(x => x.id === id);
+  if (!b) return;
+  const autoEl = document.getElementById('bAuto_' + id);
+  const v = val.trim();
+  if (!v) { autoEl.style.display = 'none'; b.cod = ''; b.nome = ''; atualizarDisplayCardBonif(id); atualizarTotais(); return; }
+  searchTimerBonif[id] = setTimeout(() => {
+    if (v.length < 2) { autoEl.style.display = 'none'; return; }
+    const vLow = v.toLowerCase();
+    const matches = [];
+    for (const [cod, nome] of Object.entries(NOMES_PRODUTO)) {
+      if (nome.toLowerCase().includes(vLow) || cod.includes(v)) {
+        matches.push({ cod, nome });
+        if (matches.length >= 15) break;
+      }
+    }
+    if (!matches.length) { autoEl.style.display = 'none'; return; }
+    autoEl.innerHTML = matches.map(m =>
+      `<div class="autocomplete-item" data-cod="${m.cod.replace(/"/g,'&quot;')}" data-nome="${m.nome.replace(/"/g,'&quot;')}">
+        <strong>${m.cod}</strong>
+        <span>${m.nome}</span>
+      </div>`
+    ).join('');
+    autoEl.style.display = 'block';
+    autoEl._bid = id;
+  }, 250);
+}
+
+function selecionarBonificacaoItem(id, cod, nome) {
+  const b = bonificacoes.find(x => x.id === id);
+  if (!b) return;
+  b.cod = cod; b.nome = nome;
+  const buscaEl = document.getElementById('bBusca_' + id);
+  if (buscaEl) buscaEl.value = cod + ' — ' + nome;
+  const autoEl = document.getElementById('bAuto_' + id);
+  if (autoEl) autoEl.style.display = 'none';
+  atualizarDisplayCardBonif(id);
+  atualizarTotais();
+}
+
+function atualizarCampoBonif(id, campo, valor) {
+  const b = bonificacoes.find(x => x.id === id);
+  if (!b) return;
+  b[campo] = valor;
+  requestAnimationFrame(() => { atualizarDisplayCardBonif(id); atualizarTotais(); });
+}
+
+function atualizarDisplayCardBonif(id) {
+  const b = bonificacoes.find(x => x.id === id);
+  if (!b) return;
+  const nomeEl = document.getElementById('bNome_' + id);
+  if (nomeEl) nomeEl.textContent = b.nome || (b.cod ? 'Produto não encontrado' : 'Informe o produto');
+  const prodCod = String(b.cod || '').trim();
+  const qtde = parseFloat(b.qtde) || 0;
+  let custoEmb = null, custoTotal = null;
+  if (prodCod && clienteAtual) {
+    const ramo_cod = clienteAtual.ramo_cod || "";
+    const entry = CUSTO[prodCod + "|" + ramo_cod] || CUSTO[prodCod + "|geral"];
+    if (entry) { custoEmb = entry.custo; custoTotal = custoEmb * qtde; }
+  }
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val; };
+  set('bCusto_' + id,    custoEmb    != null ? fmt.moeda(custoEmb)    : '—');
+  set('bCustoTot_' + id, custoTotal  != null ? fmt.moeda(custoTotal)  : '—');
+}
+
 function atualizarCampo(id, campo, valor) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
@@ -591,20 +743,34 @@ function calcularLinha(p) {
 
 function atualizarTotais() {
   const card = document.getElementById('totalsCard');
-  if (produtos.length === 0) { card.style.display = 'none'; return; }
+  if (produtos.length === 0 && bonificacoes.length === 0) { card.style.display = 'none'; return; }
   card.style.display = 'block';
   let totalQtde = 0, totalU = 0, totalO = 0, validas = 0;
   for (const p of produtos) {
     const c = calcularLinha(p);
     if (c._U) { totalQtde += c._qtde || 0; totalU += c._U; totalO += c._O; validas++; }
   }
-  if (!validas) {
+  let totalBonifCusto = 0;
+  for (const b of bonificacoes) {
+    if (!b.cod || !clienteAtual) continue;
+    const ramo_cod = clienteAtual.ramo_cod || "";
+    const entry = CUSTO[b.cod + "|" + ramo_cod] || CUSTO[b.cod + "|geral"];
+    if (entry) totalBonifCusto += entry.custo * (parseFloat(b.qtde) || 0);
+  }
+  totalO += totalBonifCusto;
+  const bifRow = document.getElementById('totBonifRow');
+  if (bifRow) {
+    bifRow.style.display = totalBonifCusto > 0 ? 'block' : 'none';
+    const el = document.getElementById('totBonifCusto');
+    if (el) el.textContent = fmt.moeda(totalBonifCusto);
+  }
+  if (!validas && totalBonifCusto === 0) {
     ['totQtde','totFaturamento','totMargem'].forEach(id => document.getElementById(id).textContent = '—');
     return;
   }
   const mb = totalU ? (totalU - totalO) / totalU : null;
-  document.getElementById('totQtde').textContent        = totalQtde.toLocaleString('pt-BR') + ' emb.';
-  document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
+  document.getElementById('totQtde').textContent        = validas ? totalQtde.toLocaleString('pt-BR') + ' emb.' : '—';
+  document.getElementById('totFaturamento').textContent = validas ? fmt.moeda(totalU) : '—';
   document.getElementById('totMargem').textContent      = fmt.pct(mb);
 }
 
@@ -613,14 +779,17 @@ function gerarExport() {
   if (!clienteAtual || produtos.length === 0) return;
   const now = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
-  let produtosHtml = '';
-  produtos.forEach((p, idx) => {
-    if (!p.cod) return;
+  const prodComCod = produtos.filter(p => p.cod);
+  const bonifComCod = bonificacoes.filter(b => b.cod);
+  const temBonif = bonifComCod.length > 0;
+
+  let vendaHtml = '';
+  prodComCod.forEach((p, idx) => {
     const calc = calcularLinha(p);
     const nome = calc.nome || p.nome || ('Produto ' + p.cod);
     const mgClass = calc.AB == null ? '' : calc.AB >= 0.1 ? 'green' : calc.AB >= 0 ? '' : 'red';
     const hist = (typeof HIST_PRODUTO !== 'undefined' && clienteAtual) ? HIST_PRODUTO[clienteAtual.cod + '|' + p.cod] : null;
-    produtosHtml += `
+    vendaHtml += `
       <div class="exp-product">
         <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
         <div class="exp-product-body">
@@ -629,24 +798,52 @@ function gerarExport() {
           <div><div class="exp-field-label">Custo / Emb.</div><div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
           <div><div class="exp-field-label">Faturamento</div><div class="exp-field-value">${calc.U != null ? fmt.moeda(calc.U) : '—'}</div></div>
-          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value ${mgClass}" style="font-size:13px">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
+          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value ${mgClass}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
           ${hist ? `<div style="grid-column:1/-1"><div class="exp-field-label">Último Pedido</div><div class="exp-field-value">${hist.data} &nbsp;·&nbsp; ${fmt.moeda(hist.preco)}/emb.</div></div>` : ''}
         </div>
       </div>`;
   });
 
+  let bonifHtml = '';
+  bonifComCod.forEach((b, idx) => {
+    const ramo_cod = clienteAtual.ramo_cod || "";
+    const entry = CUSTO[b.cod + "|" + ramo_cod] || CUSTO[b.cod + "|geral"];
+    const custoEmb = entry ? entry.custo : null;
+    const qtde = parseFloat(b.qtde) || 0;
+    const custoTotal = custoEmb != null ? custoEmb * qtde : null;
+    const nome = (entry && entry.nome) || b.nome || b.cod;
+    bonifHtml += `
+      <div class="exp-product">
+        <div class="exp-bonif-hdr">BONIF. #${idx+1} &nbsp;${b.cod} — ${nome}</div>
+        <div class="exp-product-body">
+          <div><div class="exp-field-label">Qtde (Emb.)</div><div class="exp-field-value">${b.qtde||'—'}</div></div>
+          <div><div class="exp-field-label">Custo / Emb.</div><div class="exp-field-value">${custoEmb != null ? fmt.moeda(custoEmb) : '—'}</div></div>
+          <div style="grid-column:1/-1"><div class="exp-field-label">Custo Total Bonif.</div><div class="exp-field-value red">${custoTotal != null ? fmt.moeda(custoTotal) : '—'}</div></div>
+        </div>
+      </div>`;
+  });
+
   let totalQtde = 0, totalU = 0, totalO = 0, validas = 0;
-  for (const p of produtos) {
+  for (const p of prodComCod) {
     const c = calcularLinha(p);
     if (c._U) { totalQtde += c._qtde || 0; totalU += c._U; totalO += c._O; validas++; }
   }
-  const totaisHtml = validas ? `
+  let totalBonifCusto = 0;
+  for (const b of bonifComCod) {
+    const ramo_cod = clienteAtual.ramo_cod || "";
+    const entry = CUSTO[b.cod + "|" + ramo_cod] || CUSTO[b.cod + "|geral"];
+    if (entry) totalBonifCusto += entry.custo * (parseFloat(b.qtde) || 0);
+  }
+  totalO += totalBonifCusto;
+
+  const totaisHtml = (validas || totalBonifCusto > 0) ? `
     <div class="exp-totals">
       <div class="exp-totals-title">Resumo Total</div>
       <div class="exp-totals-grid">
-        <div><div class="exp-total-label">Qtde Total</div><div class="exp-total-value">${totalQtde} emb.</div></div>
-        <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>
-        <div class="exp-full"><div class="exp-total-label">Margem Bruta %</div><div class="exp-total-value accent">${fmt.pct(totalU ? (totalU-totalO)/totalU : null)}</div></div>
+        ${validas ? `<div><div class="exp-total-label">Qtde Total (Venda)</div><div class="exp-total-value">${totalQtde} emb.</div></div>
+        <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>` : ''}
+        ${totalBonifCusto > 0 ? `<div class="exp-full"><div class="exp-total-label">Custo Bonificação</div><div class="exp-total-value" style="color:#ffc947">${fmt.moeda(totalBonifCusto)}</div></div>` : ''}
+        <div class="exp-full"><div class="exp-total-label">Margem Bruta % (c/ bonif.)</div><div class="exp-total-value accent">${fmt.pct(totalU ? (totalU-totalO)/totalU : null)}</div></div>
       </div>
     </div>` : '';
 
@@ -662,7 +859,8 @@ function gerarExport() {
       <div class="exp-client-nome">${clienteAtual.cod} — ${clienteAtual.nome}</div>
       <div class="exp-client-info">${clienteAtual.ramo} | ${clienteAtual.segmento}</div>
     </div>
-    ${produtosHtml}
+    ${prodComCod.length > 0 ? `<div class="exp-section-label">🛒 Venda</div>${vendaHtml}` : ''}
+    ${temBonif ? `<div class="exp-section-label">🎁 Bonificação</div>${bonifHtml}` : ''}
     ${totaisHtml}
     <div class="exp-footer">West Brasil Lubrificantes • Simulador de Margem - Especialidades</div>`;
 
