@@ -435,7 +435,7 @@ function criarCardProduto(p, num) {
       <button class="btn-remove" onclick="removerProduto(${p.id})">×</button>
     </div>
     <div class="produto-body">
-      <div class="input-group" style="position:relative">
+      <div class="input-group search-wrap">
         <label>PRODUTO (código ou nome)</label>
         <input type="text" id="pBusca_${p.id}" value="${p.cod ? p.cod + (p.nome ? ' — ' + p.nome : '') : ''}"
                placeholder="Ex: 124699 ou ADITECH..."
@@ -489,12 +489,7 @@ function buscaProduto(id, val) {
   const v = val.trim();
   if (!v) { autoEl.style.display = 'none'; p.cod = ''; p.nome = ''; atualizarDisplayCard(id); atualizarTotais(); return; }
 
-  // Busca exata por código (qualquer formato)
-  if (NOMES_PRODUTO[v]) {
-    selecionarProdutoItem(id, v, NOMES_PRODUTO[v]);
-    autoEl.style.display = 'none';
-    return;
-  }
+  // Nenhum auto-select imediato — sempre mostra a lista para o usuário clicar
 
   searchTimerProd[id] = setTimeout(() => {
     if (v.length < 2) { autoEl.style.display = 'none'; return; }
@@ -528,7 +523,6 @@ function selecionarProdutoItem(id, cod, nome) {
   if (autoEl) autoEl.style.display = 'none';
   atualizarDisplayCard(id);
   atualizarTotais();
-  setTimeout(() => { const el = document.getElementById('pQtde_' + id); if (el) el.focus(); }, 50);
 }
 
 function atualizarCampo(id, campo, valor) {
