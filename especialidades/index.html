@@ -400,8 +400,8 @@ function navegarListaCli(e) {
 }
 document.addEventListener('mousedown', e => {
   // Clique em item de produto (autocomplete)
-  const item = e.target.closest('.prod-autocomplete .autocomplete-item');
-  if (item) {
+  const item = e.target.closest('.autocomplete-item');
+  if (item && item.closest('.prod-autocomplete')) {
     e.preventDefault();
     const autoEl = item.closest('.prod-autocomplete');
     const pid = autoEl._pid;
