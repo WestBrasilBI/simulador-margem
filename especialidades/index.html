@@ -398,7 +398,17 @@ function selecionarCliente(cod, c) {
 function navegarListaCli(e) {
   if (e.key === 'Escape') document.getElementById('autoListCli').style.display = 'none';
 }
-document.addEventListener('click', e => {
+document.addEventListener('mousedown', e => {
+  // Clique em item de produto (autocomplete)
+  const item = e.target.closest('.prod-autocomplete .autocomplete-item');
+  if (item) {
+    e.preventDefault();
+    const autoEl = item.closest('.prod-autocomplete');
+    const pid = autoEl._pid;
+    selecionarProdutoItem(pid, item.dataset.cod, item.dataset.nome);
+    return;
+  }
+  // Fechar dropdowns ao clicar fora
   if (!e.target.closest('.search-wrap')) {
     document.getElementById('autoListCli').style.display = 'none';
     document.querySelectorAll('.prod-autocomplete').forEach(el => el.style.display = 'none');
@@ -503,12 +513,13 @@ function buscaProduto(id, val) {
     }
     if (!matches.length) { autoEl.style.display = 'none'; return; }
     autoEl.innerHTML = matches.map(m =>
-      `<div class="autocomplete-item" onmousedown="event.preventDefault(); selecionarProdutoItem(${id},'${m.cod}',${JSON.stringify(m.nome)})">
+      `<div class="autocomplete-item" data-cod="${m.cod.replace(/"/g,'&quot;')}" data-nome="${m.nome.replace(/"/g,'&quot;')}">
         <strong>${m.cod}</strong>
         <span>${m.nome}</span>
       </div>`
     ).join('');
     autoEl.style.display = 'block';
+    autoEl._pid = id;
   }, 250);
 }
 
