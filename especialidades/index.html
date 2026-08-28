@@ -87,24 +87,26 @@
   .client-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
   .client-badge { background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
 
-  .produto-card { background: var(--white); border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 10px; overflow: hidden; border: 1.5px solid var(--gray-border); }
-  .produto-header { background: var(--blue); color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
-  .produto-num { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-  .produto-nome-header { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .btn-remove { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 16px; line-height: 1; }
-  .produto-body { padding: 14px; }
-  .input-group { margin-bottom: 12px; }
-  .input-group label { font-size: 11px; font-weight: 600; color: var(--gray-text); margin-bottom: 4px; }
-  .input-group input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: 7px; padding: 9px 10px; font-size: 14px; background: var(--white); outline: none; transition: border-color 0.2s; }
+  .produto-card { background: var(--white); border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 8px; overflow: hidden; border: 1.5px solid var(--gray-border); }
+  .produto-header { background: var(--blue); color: white; padding: 7px 12px; display: flex; align-items: center; gap: 7px; }
+  .produto-num { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+  .produto-nome-header { font-size: 12px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .btn-remove { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 5px; padding: 2px 7px; cursor: pointer; font-size: 15px; line-height: 1; }
+  .produto-body { padding: 10px 12px; }
+  .input-group { margin-bottom: 8px; }
+  .input-group label { font-size: 10px; font-weight: 600; color: var(--gray-text); margin-bottom: 3px; }
+  .input-group input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: 6px; padding: 6px 9px; font-size: 13px; background: var(--white); outline: none; transition: border-color 0.2s; }
   .input-group input:focus { border-color: var(--blue); }
-  .calc-section { background: var(--gray-bg); border-radius: 8px; padding: 12px; }
-  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; }
-  .calc-value { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .inputs-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .calc-section { background: var(--gray-bg); border-radius: 7px; padding: 8px 10px; }
+  .calc-row { display: flex; justify-content: space-between; gap: 8px; }
+  .calc-item-inline { display: flex; align-items: baseline; gap: 5px; }
+  .calc-label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .calc-value { font-size: 13px; font-weight: 700; color: var(--text); }
   .calc-value.green { color: var(--green); }
   .calc-value.red { color: var(--red); }
   .calc-value.highlight { color: var(--blue); }
-  .separator { border: none; border-top: 1px solid var(--gray-border); margin: 10px 0; }
+  .separator { border: none; border-top: 1px solid var(--gray-border); margin: 6px 0; }
 
   .totals-card { background: var(--blue); color: white; border-radius: 14px; padding: 18px; margin-top: 4px; }
   .totals-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; opacity: 0.8; }
@@ -454,35 +456,27 @@ function criarCardProduto(p, num) {
                onkeydown="if(event.key==='Escape') document.getElementById('pAuto_${p.id}').style.display='none'">
         <div class="autocomplete-list prod-autocomplete" id="pAuto_${p.id}" style="display:none"></div>
       </div>
-      <div class="input-group">
-        <label>QTDE (Embalagens)</label>
-        <input type="number" id="pQtde_${p.id}" value="${p.qtde}" placeholder="0"
-               min="0" step="1" inputmode="decimal" oninput="atualizarCampo(${p.id},'qtde',this.value)">
-      </div>
-      <div class="input-group">
-        <label>PREÇO VENDA FATURADO (R$ / embalagem)</label>
-        <input type="number" id="pPreco_${p.id}" value="${p.preco}" placeholder="0.00"
-               min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'preco',this.value)">
+      <div class="inputs-row2">
+        <div class="input-group" style="margin-bottom:0">
+          <label>QTDE (Emb.)</label>
+          <input type="number" id="pQtde_${p.id}" value="${p.qtde}" placeholder="0"
+                 min="0" step="1" inputmode="decimal" oninput="atualizarCampo(${p.id},'qtde',this.value)">
+        </div>
+        <div class="input-group" style="margin-bottom:0">
+          <label>PREÇO VENDA (R$/emb.)</label>
+          <input type="number" id="pPreco_${p.id}" value="${p.preco}" placeholder="0.00"
+                 min="0" step="0.01" inputmode="decimal" oninput="atualizarCampo(${p.id},'preco',this.value)">
+        </div>
       </div>
       <div class="hist-prod" id="pHist_${p.id}"></div>
       <div class="calc-section">
-        <div class="calc-grid">
-          <div class="calc-item">
-            <div class="calc-label">Custo Total / Emb.</div>
-            <div class="calc-value" id="pCusto_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">Preço Sugerido</div>
-            <div class="calc-value" id="pPrecoSug_${p.id}">${calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">Faturamento</div>
-            <div class="calc-value" id="pFatur_${p.id}">${calc.U != null ? fmt.moeda(calc.U) : '—'}</div>
-          </div>
-          <div class="calc-item">
-            <div class="calc-label">Margem Bruta %</div>
-            <div class="calc-value ${mgClass}" id="pMargem_${p.id}" style="font-size:16px">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div>
-          </div>
+        <div class="calc-row">
+          <div class="calc-item-inline"><span class="calc-label">Custo:</span><span class="calc-value" id="pCusto_${p.id}">${calc.J != null ? fmt.moeda(calc.J) : '—'}</span></div>
+          <div class="calc-item-inline"><span class="calc-label">Sugerido:</span><span class="calc-value" id="pPrecoSug_${p.id}">${calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—'}</span></div>
+        </div>
+        <div class="calc-row" style="margin-top:5px">
+          <div class="calc-item-inline"><span class="calc-label">Faturamento:</span><span class="calc-value" id="pFatur_${p.id}">${calc.U != null ? fmt.moeda(calc.U) : '—'}</span></div>
+          <div class="calc-item-inline"><span class="calc-label">Margem:</span><span class="calc-value ${mgClass}" id="pMargem_${p.id}" style="font-size:15px">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</span></div>
         </div>
       </div>
     </div>
