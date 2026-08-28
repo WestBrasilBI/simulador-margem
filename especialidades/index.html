@@ -489,8 +489,8 @@ function buscaProduto(id, val) {
   const v = val.trim();
   if (!v) { autoEl.style.display = 'none'; p.cod = ''; p.nome = ''; atualizarDisplayCard(id); atualizarTotais(); return; }
 
-  // Busca exata por código
-  if (/^\d+$/.test(v) && NOMES_PRODUTO[v]) {
+  // Busca exata por código (qualquer formato)
+  if (NOMES_PRODUTO[v]) {
     selecionarProdutoItem(id, v, NOMES_PRODUTO[v]);
     autoEl.style.display = 'none';
     return;
@@ -508,7 +508,7 @@ function buscaProduto(id, val) {
     }
     if (!matches.length) { autoEl.style.display = 'none'; return; }
     autoEl.innerHTML = matches.map(m =>
-      `<div class="autocomplete-item" onclick="selecionarProdutoItem(${id},'${m.cod}',${JSON.stringify(m.nome)})">
+      `<div class="autocomplete-item" onmousedown="event.preventDefault(); selecionarProdutoItem(${id},'${m.cod}',${JSON.stringify(m.nome)})">
         <strong>${m.cod}</strong>
         <span>${m.nome}</span>
       </div>`
