@@ -1,4 +1,4 @@
-const CACHE = 'simulador-esp-v2';
+const CACHE = 'simulador-esp-v3';
 const ASSETS = ['./', './index.html', './data/data.js'];
 
 self.addEventListener('install', e => {
