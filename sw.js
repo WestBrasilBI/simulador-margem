@@ -1,8 +1,8 @@
-﻿const CACHE = 'simulador-mg-v9';
-const ASSETS = ['./', './index.html', './data/data.js'];
+﻿const CACHE = 'simulador-mg-v10';
+const STATIC = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
 });
 
@@ -14,6 +14,12 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // data.js: sempre da rede — nunca servir do cache
+  if (e.request.url.includes('data/data.js')) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
+  }
+  // demais assets: network-first com fallback para cache
   e.respondWith(
     fetch(e.request)
       .then(res => {
