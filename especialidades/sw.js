@@ -1,5 +1,5 @@
-const CACHE = 'simulador-esp-v4';
-const ASSETS = ['./', './index.html', './data/data.js'];
+const CACHE = 'simulador-esp-v5';
+const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
