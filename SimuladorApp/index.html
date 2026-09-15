@@ -164,8 +164,11 @@
   /* HISTÓRICO */
   .hist-cli { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
   .hist-cli-icon { font-size: 13px; }
-  .hist-prod { background: #eef4fb; border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: var(--gray-text); display: none; }
+  .hist-prod { background: #eef4fb; border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 4px; font-size: 12px; color: var(--gray-text); display: none; }
   .hist-prod strong { color: var(--blue); font-weight: 700; }
+  .promo-prod { background: #f0faf0; border-left: 3px solid #2e8b4a; border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: #2e6b40; display: none; }
+  .promo-prod strong { color: #1e6b30; font-weight: 700; }
+  .promo-prod .promo-esc { opacity: 0.7; font-size: 11px; }
 
   /* PRAZO DISPLAY */
   .prazo-display { background: var(--gray-bg); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--gray-text); }
@@ -654,6 +657,7 @@ function criarCardProduto(p, num) {
         </div>
       </div>
       <div class="hist-prod" id="pHist_${p.id}"></div>
+      <div class="promo-prod" id="pPromo_${p.id}"></div>
       <div class="calc-section">
         <div class="calc-grid">
           <div class="calc-item"><div class="calc-label">Volume Total</div><div class="calc-value" id="pVolTotal_${p.id}">${calc.I != null ? fmt.vol(calc.I) : '—'}</div></div>
@@ -714,12 +718,69 @@ function atualizarDisplayCard(id) {
       histEl.style.display = 'none';
     }
   }
+  // Preço de promoção disponível para esse produto/cliente
+  const promoEl = document.getElementById('pPromo_' + id);
+  if (promoEl && clienteAtual) {
+    const promo = buscarPromo(String(p.cod || '').trim(), p.qtde);
+    if (promo) {
+      let txt = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong>`;
+      if (promo.hasEsc && promo.qtde != null) {
+        txt += promo.abaixo
+          ? ` <span class="promo-esc">(escalonada a partir de ${promo.minQtde} emb.)</span>`
+          : ` <span class="promo-esc">(escalonada ${promo.qtde} emb.)</span>`;
+      } else if (!promo.hasEsc && promo.qtde == null) {
+        txt += ` <span class="promo-esc">(preço único)</span>`;
+      }
+      promoEl.innerHTML = txt;
+      promoEl.style.display = 'block';
+    } else {
+      promoEl.style.display = 'none';
+    }
+  }
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
     margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
     margemEl.className = 'calc-value ' + (calc.AD == null ? '' : calc.AD >= 0.1 ? 'green' : calc.AD >= 0 ? 'highlight' : 'red');
     margemEl.style.fontSize = '16px';
   }
+}
+
+// ─── PROMOÇÕES ───────────────────────────────────────────────────────────────
+function buscarPromo(prodCod, qtde) {
+  if (typeof PRECOS === 'undefined' || !PRECOS.length || !clienteAtual || !prodCod) return null;
+  const isConsumo = clienteAtual.ramo.includes('CONSUMO') || clienteAtual.ramo.startsWith('6');
+  const canal = isConsumo ? 'Consumo (B2B)' : 'Revenda';
+  const imbp = (clienteAtual.imbp || '').trim().toUpperCase();
+  const qtdeN = parseFloat(qtde) || 0;
+
+  const todos = PRECOS.filter(e => String(e.c).trim() === prodCod && e.ca === canal);
+  if (!todos.length) return null;
+
+  // Preferência: IMBP exato > IMBP vazio > qualquer
+  let grupo = todos.filter(e => e.im && e.im.toUpperCase() === imbp);
+  if (!grupo.length) grupo = todos.filter(e => !e.im);
+  if (!grupo.length) grupo = todos;
+
+  const entry = grupo[0];
+  const tiers = (entry.t || []).filter(t => !t.x); // ignora faixas de referência (x=1)
+  if (!tiers.length) return null;
+
+  // Tiers com quantidade numérica → escalonada
+  const numTiers = tiers.filter(t => t.l && !isNaN(parseFloat(t.l)));
+  if (numTiers.length > 0) {
+    numTiers.sort((a, b) => parseFloat(a.l) - parseFloat(b.l));
+    let matched = null;
+    for (const t of numTiers) {
+      if (parseFloat(t.l) <= qtdeN) matched = t;
+    }
+    if (!matched) matched = numTiers[0]; // abaixo do mínimo: mostra o menor nível
+    const minQtde = parseFloat(numTiers[0].l);
+    const abaixo = qtdeN > 0 && qtdeN < minQtde;
+    return { preco: matched.p, qtde: parseFloat(matched.l), minQtde, abaixo, aba: entry.ab, hasEsc: numTiers.length > 1 };
+  }
+
+  // Preço único (sem escalonada de quantidade)
+  return { preco: tiers[0].p, qtde: null, minQtde: null, abaixo: false, aba: entry.ab, hasEsc: false };
 }
 
 // ─── CÁLCULOS ────────────────────────────────────────────────────────────────
