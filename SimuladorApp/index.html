@@ -723,15 +723,13 @@ function atualizarDisplayCard(id) {
   if (promoEl && clienteAtual) {
     const promo = buscarPromo(String(p.cod || '').trim(), p.qtde);
     if (promo) {
-      let txt = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong>`;
+      let escInfo = '';
       if (promo.hasEsc && promo.qtde != null) {
-        txt += promo.abaixo
-          ? ` <span class="promo-esc">(escalonada a partir de ${promo.minQtde} emb.)</span>`
-          : ` <span class="promo-esc">(escalonada ${promo.qtde} emb.)</span>`;
-      } else if (!promo.hasEsc && promo.qtde == null) {
-        txt += ` <span class="promo-esc">(preço único)</span>`;
+        escInfo = promo.abaixo
+          ? ` (a partir de ${promo.minQtde} emb.)`
+          : ` (${promo.qtde} emb.)`;
       }
-      promoEl.innerHTML = txt;
+      promoEl.innerHTML = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong><span class="promo-esc">${escInfo} · ${promo.aba}</span>`;
       promoEl.style.display = 'block';
     } else {
       promoEl.style.display = 'none';
@@ -749,37 +747,56 @@ function atualizarDisplayCard(id) {
 function buscarPromo(prodCod, qtde) {
   if (typeof PRECOS === 'undefined' || !PRECOS.length || !clienteAtual || !prodCod) return null;
   const isConsumo = clienteAtual.ramo.includes('CONSUMO') || clienteAtual.ramo.startsWith('6');
-  const canal = isConsumo ? 'Consumo (B2B)' : 'Revenda';
-  const imbp = (clienteAtual.imbp || '').trim().toUpperCase();
-  const qtdeN = parseFloat(qtde) || 0;
+  const canal  = isConsumo ? 'Consumo (B2B)' : 'Revenda';
+  const imbpCli = (clienteAtual.imbp     || '').toUpperCase();
+  const segCli  = (clienteAtual.segmento || '').toUpperCase();
+  const qtdeN   = parseFloat(qtde) || 0;
 
-  const todos = PRECOS.filter(e => String(e.c).trim() === prodCod && e.ca === canal);
-  if (!todos.length) return null;
+  // Abas que nunca devem aparecer
+  const excluida = e => {
+    const ab = (e.ab || '').toUpperCase();
+    return ab.includes('SORTIMENTO') || ab.includes('POSITIVAC') || ab.includes('POSITIVAÇ');
+  };
 
-  // Preferência: IMBP exato > IMBP vazio > qualquer
-  let grupo = todos.filter(e => e.im && e.im.toUpperCase() === imbp);
-  if (!grupo.length) grupo = todos.filter(e => !e.im);
-  if (!grupo.length) grupo = todos;
+  const candidatos = PRECOS.filter(e =>
+    String(e.c).trim() === prodCod && e.ca === canal && !excluida(e)
+  );
+  if (!candidatos.length) return null;
 
-  const entry = grupo[0];
-  const tiers = (entry.t || []).filter(t => !t.x); // ignora faixas de referência (x=1)
+  let entry = null;
+  if (isConsumo) {
+    // B2B: match por IMBP exato > IMBP vazio > qualquer
+    let grupo = candidatos.filter(e => e.im && e.im.toUpperCase() === imbpCli);
+    if (!grupo.length) grupo = candidatos.filter(e => !e.im);
+    if (!grupo.length) grupo = candidatos;
+    entry = grupo[0];
+  } else {
+    // Revenda: aba determinada pelo perfil do cliente
+    const isPVL       = imbpCli.includes('PVL');
+    const isAutoPecas = isPVL && (segCli.includes('AUTO') || segCli.includes('PECA') || segCli.includes('PEÇA'));
+    const isConcess   = isPVL && segCli.includes('CONCESS');
+    let abAlvo;
+    if (isAutoPecas)    abAlvo = 'AUTO';
+    else if (isConcess) abAlvo = 'CONCESS';
+    else                abAlvo = 'OUTROS';
+    entry = candidatos.find(e => (e.ab || '').toUpperCase().includes(abAlvo));
+    if (!entry) entry = candidatos[0];
+  }
+
+  if (!entry) return null;
+  const tiers = (entry.t || []).filter(t => !t.x);
   if (!tiers.length) return null;
 
-  // Tiers com quantidade numérica → escalonada
   const numTiers = tiers.filter(t => t.l && !isNaN(parseFloat(t.l)));
   if (numTiers.length > 0) {
     numTiers.sort((a, b) => parseFloat(a.l) - parseFloat(b.l));
     let matched = null;
-    for (const t of numTiers) {
-      if (parseFloat(t.l) <= qtdeN) matched = t;
-    }
-    if (!matched) matched = numTiers[0]; // abaixo do mínimo: mostra o menor nível
+    for (const t of numTiers) { if (parseFloat(t.l) <= qtdeN) matched = t; }
+    if (!matched) matched = numTiers[0];
     const minQtde = parseFloat(numTiers[0].l);
-    const abaixo = qtdeN > 0 && qtdeN < minQtde;
+    const abaixo  = qtdeN > 0 && qtdeN < minQtde;
     return { preco: matched.p, qtde: parseFloat(matched.l), minQtde, abaixo, aba: entry.ab, hasEsc: numTiers.length > 1 };
   }
-
-  // Preço único (sem escalonada de quantidade)
   return { preco: tiers[0].p, qtde: null, minQtde: null, abaixo: false, aba: entry.ab, hasEsc: false };
 }
 
