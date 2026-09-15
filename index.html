@@ -169,6 +169,7 @@
   .promo-prod { background: #f0faf0; border-left: 3px solid #2e8b4a; border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 10px; font-size: 12px; color: #2e6b40; display: none; }
   .promo-prod strong { color: #1e6b30; font-weight: 700; }
   .promo-prod .promo-esc { opacity: 0.7; font-size: 11px; }
+  .promo-prod .promo-dpf { display: inline-block; margin-top: 3px; font-size: 11px; color: #2e6b40; opacity: 0.85; }
 
   /* PRAZO DISPLAY */
   .prazo-display { background: var(--gray-bg); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--gray-text); }
@@ -718,18 +719,23 @@ function atualizarDisplayCard(id) {
       histEl.style.display = 'none';
     }
   }
-  // Preço de promoção disponível para esse produto/cliente
+  // Preço de promoção disponível para esse produto/cliente (usa qtde total do pedido)
   const promoEl = document.getElementById('pPromo_' + id);
   if (promoEl && clienteAtual) {
-    const promo = buscarPromo(String(p.cod || '').trim(), p.qtde);
+    const qtdeTotal = produtos.reduce((s, px) => s + (parseFloat(px.qtde) || 0), 0);
+    const promo = buscarPromo(String(p.cod || '').trim(), qtdeTotal);
     if (promo) {
       let escInfo = '';
       if (promo.hasEsc && promo.qtde != null) {
         escInfo = promo.abaixo
           ? ` (a partir de ${promo.minQtde} emb.)`
-          : ` (${promo.qtde} emb.)`;
+          : ` (${qtdeTotal} emb.)`;
       }
-      promoEl.innerHTML = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong><span class="promo-esc">${escInfo} · ${promo.aba}</span>`;
+      let html = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong><span class="promo-esc">${escInfo} · ${promo.aba}</span>`;
+      if (promo.rl != null) {
+        html += `<br><span class="promo-dpf">DPF: <strong>${fmt.moeda(promo.rl)}/L</strong></span>`;
+      }
+      promoEl.innerHTML = html;
       promoEl.style.display = 'block';
     } else {
       promoEl.style.display = 'none';
@@ -795,9 +801,9 @@ function buscarPromo(prodCod, qtde) {
     if (!matched) matched = numTiers[0];
     const minQtde = parseFloat(numTiers[0].l);
     const abaixo  = qtdeN > 0 && qtdeN < minQtde;
-    return { preco: matched.p, qtde: parseFloat(matched.l), minQtde, abaixo, aba: entry.ab, hasEsc: numTiers.length > 1 };
+    return { preco: matched.p, qtde: parseFloat(matched.l), minQtde, abaixo, aba: entry.ab, hasEsc: numTiers.length > 1, rl: entry.rl ?? null };
   }
-  return { preco: tiers[0].p, qtde: null, minQtde: null, abaixo: false, aba: entry.ab, hasEsc: false };
+  return { preco: tiers[0].p, qtde: null, minQtde: null, abaixo: false, aba: entry.ab, hasEsc: false, rl: entry.rl ?? null };
 }
 
 // ─── CÁLCULOS ────────────────────────────────────────────────────────────────
