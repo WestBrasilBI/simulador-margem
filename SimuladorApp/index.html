@@ -610,6 +610,7 @@ function adicionarProduto() {
   const id = ++produtoIdSeq;
   produtos.push({ id, cod:'', qtde:'', dpf:'0', preco:'' });
   renderizarProdutos();
+  produtos.forEach(p => atualizarDisplayCard(p.id));
   atualizarTotais();
   setTimeout(() => { const el = document.getElementById('pCod_' + id); if (el) el.focus(); }, 100);
 }
@@ -617,6 +618,7 @@ function adicionarProduto() {
 function removerProduto(id) {
   produtos = produtos.filter(p => p.id !== id);
   renderizarProdutos();
+  produtos.forEach(p => atualizarDisplayCard(p.id));
   atualizarTotais();
 }
 
@@ -690,7 +692,14 @@ function atualizarCampo(id, campo, valor) {
   const p = produtos.find(x => x.id === id);
   if (!p) return;
   p[campo] = valor;
-  requestAnimationFrame(() => { atualizarDisplayCard(id); atualizarTotais(); });
+  requestAnimationFrame(() => {
+    atualizarDisplayCard(id);
+    atualizarTotais();
+    // Quando a qtde muda, o total do pedido muda → atualiza promo de todos os outros
+    if (campo === 'qtde') {
+      produtos.forEach(px => { if (px.id !== id) atualizarPromoDiv(px.id); });
+    }
+  });
 }
 
 function atualizarDisplayCard(id) {
@@ -719,28 +728,7 @@ function atualizarDisplayCard(id) {
       histEl.style.display = 'none';
     }
   }
-  // Preço de promoção disponível para esse produto/cliente (usa qtde total do pedido)
-  const promoEl = document.getElementById('pPromo_' + id);
-  if (promoEl && clienteAtual) {
-    const qtdeTotal = produtos.reduce((s, px) => s + (parseFloat(px.qtde) || 0), 0);
-    const promo = buscarPromo(String(p.cod || '').trim(), qtdeTotal);
-    if (promo) {
-      let escInfo = '';
-      if (promo.hasEsc && promo.qtde != null) {
-        escInfo = promo.abaixo
-          ? ` (a partir de ${promo.minQtde} emb.)`
-          : ` (${qtdeTotal} emb.)`;
-      }
-      let html = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong><span class="promo-esc">${escInfo} · ${promo.aba}</span>`;
-      if (promo.rl != null) {
-        html += `<br><span class="promo-dpf">DPF: <strong>${fmt.moeda(promo.rl)}/L</strong></span>`;
-      }
-      promoEl.innerHTML = html;
-      promoEl.style.display = 'block';
-    } else {
-      promoEl.style.display = 'none';
-    }
-  }
+  atualizarPromoDiv(id);
   const margemEl = document.getElementById('pMargem_' + id);
   if (margemEl) {
     margemEl.textContent = calc.AD != null ? fmt.pct(calc.AD) : '—';
@@ -750,6 +738,30 @@ function atualizarDisplayCard(id) {
 }
 
 // ─── PROMOÇÕES ───────────────────────────────────────────────────────────────
+function atualizarPromoDiv(id) {
+  const p = produtos.find(x => x.id === id);
+  const promoEl = document.getElementById('pPromo_' + id);
+  if (!p || !promoEl || !clienteAtual) return;
+  const qtdeTotal = produtos.reduce((s, px) => s + (parseFloat(px.qtde) || 0), 0);
+  const promo = buscarPromo(String(p.cod || '').trim(), qtdeTotal);
+  if (promo) {
+    let escInfo = '';
+    if (promo.hasEsc && promo.qtde != null) {
+      escInfo = promo.abaixo
+        ? ` (a partir de ${promo.minQtde} emb.)`
+        : ` (${qtdeTotal} emb.)`;
+    }
+    let html = `🏷️ Preço Promoção: <strong>${fmt.moeda(promo.preco)}/emb.</strong><span class="promo-esc">${escInfo} · ${promo.aba}</span>`;
+    if (promo.rl != null) {
+      html += `<br><span class="promo-dpf">DPF: <strong>${fmt.moeda(promo.rl)}/L</strong></span>`;
+    }
+    promoEl.innerHTML = html;
+    promoEl.style.display = 'block';
+  } else {
+    promoEl.style.display = 'none';
+  }
+}
+
 function buscarPromo(prodCod, qtde) {
   if (typeof PRECOS === 'undefined' || !PRECOS.length || !clienteAtual || !prodCod) return null;
   const isConsumo = clienteAtual.ramo.includes('CONSUMO') || clienteAtual.ramo.startsWith('6');
