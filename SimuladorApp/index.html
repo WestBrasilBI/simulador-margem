@@ -795,9 +795,11 @@ function buscarPromo(prodCod, qtde) {
     const isPVL       = imbpRaw.includes('PVL');
     const isAutoPecas = isPVL && (segCli.includes('AUTO') || segCli.includes('PECA') || segCli.includes('PEÇA'));
     const isConcess   = isPVL && segCli.includes('CONCESS');
+    const isPostos    = isPVL && segCli.includes('POSTO');
     let abAlvo;
     if (isAutoPecas)    abAlvo = 'AUTO';
     else if (isConcess) abAlvo = 'CONCESS';
+    else if (isPostos)  abAlvo = 'POSTO';
     else                abAlvo = 'OUTROS';
     entry = candidatos.find(e => (e.ab || '').toUpperCase().includes(abAlvo));
     if (!entry) entry = candidatos[0];
