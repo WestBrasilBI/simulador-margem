@@ -766,7 +766,9 @@ function buscarPromo(prodCod, qtde) {
   if (typeof PRECOS === 'undefined' || !PRECOS.length || !clienteAtual || !prodCod) return null;
   const isConsumo = clienteAtual.ramo.includes('CONSUMO') || clienteAtual.ramo.startsWith('6');
   const canal  = isConsumo ? 'Consumo (B2B)' : 'Revenda';
-  const imbpCli = (clienteAtual.imbp     || '').toUpperCase();
+  const imbpRaw = (clienteAtual.imbp || '').toUpperCase();
+  // Extrai só o prefixo numérico do IMBP do cliente: "000028-CVL-AGRI" → "000028"
+  const imbpNum = (imbpRaw.match(/^(0\d{4,})/) || [])[1] || imbpRaw;
   const segCli  = (clienteAtual.segmento || '').toUpperCase();
   const qtdeN   = parseFloat(qtde) || 0;
 
@@ -783,14 +785,14 @@ function buscarPromo(prodCod, qtde) {
 
   let entry = null;
   if (isConsumo) {
-    // B2B: match por IMBP exato > IMBP vazio > qualquer
-    let grupo = candidatos.filter(e => e.im && e.im.toUpperCase() === imbpCli);
+    // B2B: match por código IMBP numérico exato > IMBP vazio > qualquer
+    let grupo = candidatos.filter(e => e.im && e.im === imbpNum);
     if (!grupo.length) grupo = candidatos.filter(e => !e.im);
     if (!grupo.length) grupo = candidatos;
     entry = grupo[0];
   } else {
     // Revenda: aba determinada pelo perfil do cliente
-    const isPVL       = imbpCli.includes('PVL');
+    const isPVL       = imbpRaw.includes('PVL');
     const isAutoPecas = isPVL && (segCli.includes('AUTO') || segCli.includes('PECA') || segCli.includes('PEÇA'));
     const isConcess   = isPVL && segCli.includes('CONCESS');
     let abAlvo;
