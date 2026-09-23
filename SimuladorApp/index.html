@@ -230,6 +230,21 @@
   .exp-field-value.red { color: var(--red); }
   .exp-field-value.blue { color: var(--blue); }
 
+  /* Layout compacto para 6+ produtos: grade 2 colunas */
+  .exp-products-grid { }
+  #exportDoc.exp-compact .exp-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  #exportDoc.exp-compact .exp-product { margin-bottom: 0; border-radius: 6px; }
+  #exportDoc.exp-compact .exp-product-hdr { padding: 3px 6px; font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #exportDoc.exp-compact .exp-product-body { padding: 4px 6px; gap: 3px; }
+  #exportDoc.exp-compact .exp-field-label { font-size: 6.5px; }
+  #exportDoc.exp-compact .exp-field-value { font-size: 9px; }
+  #exportDoc.exp-compact .exp-client { padding: 5px 8px; margin-bottom: 5px; }
+  #exportDoc.exp-compact .exp-client-nome { font-size: 10px; }
+  #exportDoc.exp-compact .exp-client-info { font-size: 8.5px; }
+  #exportDoc.exp-compact .exp-totals { padding: 7px 8px; margin-top: 4px; }
+  #exportDoc.exp-compact .exp-totals-grid { gap: 5px; }
+  #exportDoc.exp-compact .exp-total-value { font-size: 11px; }
+
   .exp-totals { background: var(--blue); color: white; border-radius: 8px; padding: 10px; margin-top: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .exp-totals-title { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; letter-spacing: 0.5px; }
   .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -394,7 +409,7 @@
     <div id="exportDoc"></div>
   </div>
   <div class="export-bar">
-    <div class="export-bar-hint">📸 Tire um <strong>print</strong> da tela</div>
+    <div class="export-bar-hint" id="exportHint">📸 Tire um <strong>print</strong> da tela</div>
     <button class="btn-fechar" onclick="fecharExport()">✕ Fechar</button>
   </div>
 </div>
@@ -954,7 +969,11 @@ function gerarExport() {
       </div>`;
   }
 
-  document.getElementById('exportDoc').innerHTML = `
+  const doc = document.getElementById('exportDoc');
+  const isCompact = produtos.filter(p => p.cod).length > 5;
+  doc.classList.toggle('exp-compact', isCompact);
+
+  doc.innerHTML = `
     <div class="exp-header">
       <div class="exp-logo">West Brasil</div>
       <div class="exp-header-right">
@@ -967,7 +986,7 @@ function gerarExport() {
       <div class="exp-client-info">${clienteAtual.ramo} | ${clienteAtual.segmento} | ${clienteAtual.imbp}</div>
       <span class="exp-prazo-badge">Prazo: ${prazoAtual.cod}</span>
     </div>
-    ${produtosHtml}
+    <div class="exp-products-grid">${produtosHtml}</div>
     ${totaisHtml}
     <div class="exp-footer">West Brasil Lubrificantes • Simulador de Margem Unitária</div>
   `;
@@ -977,8 +996,13 @@ function gerarExport() {
   overlay.classList.add('visible');
 
   // Reset escala
-  const doc = document.getElementById('exportDoc');
   doc.style.zoom = '1';
+
+  // Atualiza hint da barra
+  const hintEl = document.getElementById('exportHint');
+  if (hintEl) hintEl.innerHTML = isCompact
+    ? '📸 Tire um <strong>print</strong> da tela'
+    : '📸 Tire um <strong>print</strong> da tela';
 
   // Aguarda renderização e aplica zoom para caber na tela
   requestAnimationFrame(() => requestAnimationFrame(() => {
