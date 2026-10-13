@@ -787,14 +787,20 @@ function buscarPromo(prodCod, qtde) {
   const segCli  = (clienteAtual.segmento || '').toUpperCase();
   const qtdeN   = parseFloat(qtde) || 0;
 
-  // Abas que nunca devem aparecer
+  // Abas que nunca devem aparecer como sugestão de promo
   const excluida = e => {
     const ab = (e.ab || '').toUpperCase();
-    return ab.includes('SORTIMENTO') || ab.includes('POSITIVAC') || ab.includes('POSITIVAÇ');
+    return ab.includes('SORTIMENTO') || ab.includes('POSITIVAC') || ab.includes('POSITIVAÇ')
+        || ab.includes('SPRINT')     || ab.includes('COMBO');
   };
+
+  // Para Revenda, só abas permitidas
+  const normAb = ab => (ab || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toUpperCase();
+  const ALLOW_REV = new Set(['MCO','CVL','TI','AUTO PECAS','AUTOPECAS','CONCESSIONARIAS','OUTROS']);
 
   const candidatos = PRECOS.filter(e =>
     String(e.c).trim() === prodCod && e.ca === canal && !excluida(e)
+    && (isConsumo || ALLOW_REV.has(normAb(e.ab)))
   );
   if (!candidatos.length) return null;
 
