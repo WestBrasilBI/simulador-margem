@@ -1,4 +1,4 @@
-﻿const CACHE = 'simulador-mg-v13';
+﻿const CACHE = 'simulador-mg-v14';
 const STATIC = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
@@ -14,14 +14,16 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // data.js: sempre da rede — nunca servir do cache
+  // data.js: sempre da rede real, ignorando cache HTTP do navegador
   if (e.request.url.includes('data/data.js')) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
+    );
     return;
   }
-  // demais assets: network-first com fallback para cache
+  // demais assets: network-first ignorando cache HTTP, fallback para SW cache
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-store' })
       .then(res => {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
