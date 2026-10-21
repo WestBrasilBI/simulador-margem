@@ -1,4 +1,4 @@
-const CACHE = 'simulador-esp-v6';
+const CACHE = 'simulador-esp-v7';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
@@ -14,6 +14,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // data.js: sempre busca da rede ignorando cache (CDN e browser)
+  if (e.request.url.includes('/data/data.js')) {
+    e.respondWith(
+      fetch(new Request(e.request.url, { cache: 'no-cache' }))
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     fetch(e.request).then(res => {
       if (res && res.status === 200 && e.request.method === 'GET') {
