@@ -133,30 +133,31 @@
   #exportOverlay { display: none; position: fixed; inset: 0; background: white; z-index: 300; flex-direction: column; }
   #exportOverlay.visible { display: flex; }
   #exportDocWrap { flex: 1; overflow: hidden; display: flex; align-items: flex-start; justify-content: center; padding: 8px 8px 0; }
-  #exportDoc { width: 100%; max-width: 480px; background: white; transform-origin: top center; }
-  .exp-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid var(--blue); margin-bottom: 10px; }
-  .exp-logo { font-weight: 800; font-size: 15px; color: var(--blue); }
+  #exportDoc { width: 100%; max-width: 600px; background: white; transform-origin: top center; }
+  .exp-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 7px; border-bottom: 2px solid var(--blue); margin-bottom: 7px; }
+  .exp-logo { font-weight: 800; font-size: 13px; color: var(--blue); }
   .exp-header-right { text-align: right; }
-  .exp-title { font-size: 10px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
-  .exp-date { font-size: 10px; color: var(--gray-text); margin-top: 1px; }
-  .exp-client { background: var(--gray-bg); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
-  .exp-client-nome { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-  .exp-client-info { font-size: 10px; color: var(--gray-text); }
-  .exp-product { border: 1px solid var(--gray-border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
-  .exp-product-hdr { background: var(--blue); color: white; padding: 5px 10px; font-size: 10px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .exp-product-body { padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-  .exp-field-label { font-size: 8px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
-  .exp-field-value { font-size: 11px; font-weight: 600; color: var(--text); }
+  .exp-title { font-size: 8px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
+  .exp-date { font-size: 8px; color: var(--gray-text); margin-top: 1px; }
+  .exp-client { background: var(--gray-bg); border-radius: 6px; padding: 5px 8px; margin-bottom: 6px; }
+  .exp-client-nome { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+  .exp-client-info { font-size: 8px; color: var(--gray-text); }
+  .exp-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 4px; }
+  .exp-product { border: 1px solid var(--gray-border); border-radius: 6px; overflow: hidden; }
+  .exp-product-hdr { background: var(--blue); color: white; padding: 3px 7px; font-size: 7px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-product-body { padding: 5px 7px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  .exp-field-label { font-size: 6px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
+  .exp-field-value { font-size: 9px; font-weight: 700; color: var(--text); }
   .exp-field-value.green { color: var(--green); }
   .exp-field-value.red { color: var(--red); }
-  .exp-totals { background: var(--blue); color: white; border-radius: 8px; padding: 10px; margin-top: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .exp-totals-title { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; letter-spacing: 0.5px; }
-  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .exp-total-label { font-size: 8px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
-  .exp-total-value { font-size: 13px; font-weight: 700; margin-top: 1px; }
+  .exp-totals { background: var(--blue); color: white; border-radius: 6px; padding: 7px 9px; margin-top: 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-totals-title { font-size: 7px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 5px; letter-spacing: 0.5px; }
+  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .exp-total-label { font-size: 7px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
+  .exp-total-value { font-size: 11px; font-weight: 700; margin-top: 1px; }
   .exp-total-value.accent { color: #ffd166; }
   .exp-full { grid-column: 1/-1; }
-  .exp-footer { font-size: 8px; color: var(--gray-text); text-align: center; margin-top: 8px; }
+  .exp-footer { font-size: 7px; color: var(--gray-text); text-align: center; margin-top: 6px; }
   .export-bar { background: white; border-top: 1px solid var(--gray-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .export-bar-hint { font-size: 12px; color: var(--gray-text); }
   .export-bar-hint strong { color: var(--text); }
@@ -177,8 +178,8 @@
   .bonif-badge { background: rgba(255,255,255,0.25); border-radius: 20px; padding: 1px 7px; font-size: 10px; font-weight: 700; white-space: nowrap; }
   .btn-bonif { width: 100%; background: #fffbeb; color: #b86e00; border: 2px dashed #c47f0a; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; }
   /* Export sections */
-  .exp-section-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-text); padding: 5px 0 3px; border-bottom: 1px solid var(--gray-border); margin-bottom: 4px; margin-top: 8px; }
-  .exp-bonif-hdr { background: #b86e00; color: white; padding: 5px 10px; font-size: 10px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .exp-section-label { font-size: 7px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-text); padding: 4px 0 2px; border-bottom: 1px solid var(--gray-border); margin-bottom: 3px; margin-top: 6px; }
+  .exp-bonif-hdr { background: #b86e00; color: white; padding: 3px 7px; font-size: 7px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 </style>
 </head>
 <body>
@@ -783,28 +784,27 @@ function gerarExport() {
   const bonifComCod = bonificacoes.filter(b => b.cod);
   const temBonif = bonifComCod.length > 0;
 
-  let vendaHtml = '';
+  let vendaCards = '';
   prodComCod.forEach((p, idx) => {
     const calc = calcularLinha(p);
     const nome = calc.nome || p.nome || ('Produto ' + p.cod);
     const mgClass = calc.AB == null ? '' : calc.AB >= 0.1 ? 'green' : calc.AB >= 0 ? '' : 'red';
-    const hist = (typeof HIST_PRODUTO !== 'undefined' && clienteAtual) ? HIST_PRODUTO[clienteAtual.cod + '|' + p.cod] : null;
-    vendaHtml += `
+    const preco = parseFloat(p.preco) || 0;
+    const unitaria = (calc.J != null && preco) ? preco - calc.J : null;
+    const unitClass = unitaria == null ? '' : unitaria >= 0 ? 'green' : 'red';
+    vendaCards += `
       <div class="exp-product">
-        <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
+        <div class="exp-product-hdr">#${idx+1} ${p.cod} — ${nome}</div>
         <div class="exp-product-body">
-          <div><div class="exp-field-label">Qtde (Emb.)</div><div class="exp-field-value">${p.qtde||'—'}</div></div>
-          <div><div class="exp-field-label">Preço Sugerido</div><div class="exp-field-value">${calc.precoSug != null ? fmt.moeda(calc.precoSug) : '—'}</div></div>
-          <div><div class="exp-field-label">Custo / Emb.</div><div class="exp-field-value">${calc.J != null ? fmt.moeda(calc.J) : '—'}</div></div>
-          <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
-          <div><div class="exp-field-label">Faturamento</div><div class="exp-field-value">${calc.U != null ? fmt.moeda(calc.U) : '—'}</div></div>
-          <div><div class="exp-field-label">Margem Bruta %</div><div class="exp-field-value ${mgClass}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
-          ${hist ? `<div style="grid-column:1/-1"><div class="exp-field-label">Último Pedido</div><div class="exp-field-value">${hist.data} &nbsp;·&nbsp; ${fmt.moeda(hist.preco)}/emb.</div></div>` : ''}
+          <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(preco)}</div></div>
+          <div><div class="exp-field-label">Margem %</div><div class="exp-field-value ${mgClass}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
+          <div><div class="exp-field-label">Unitária</div><div class="exp-field-value ${unitClass}">${unitaria != null ? fmt.moeda(unitaria) : '—'}</div></div>
         </div>
       </div>`;
   });
+  const vendaHtml = vendaCards ? `<div class="exp-products-grid">${vendaCards}</div>` : '';
 
-  let bonifHtml = '';
+  let bonifCards = '';
   bonifComCod.forEach((b, idx) => {
     const ramo_cod = clienteAtual.ramo_cod || "";
     const entry = CUSTO[b.cod + "|" + ramo_cod] || CUSTO[b.cod + "|geral"];
@@ -812,16 +812,17 @@ function gerarExport() {
     const qtde = parseFloat(b.qtde) || 0;
     const custoTotal = custoEmb != null ? custoEmb * qtde : null;
     const nome = (entry && entry.nome) || b.nome || b.cod;
-    bonifHtml += `
+    bonifCards += `
       <div class="exp-product">
-        <div class="exp-bonif-hdr">BONIF. #${idx+1} &nbsp;${b.cod} — ${nome}</div>
+        <div class="exp-bonif-hdr">BONIF. #${idx+1} ${b.cod} — ${nome}</div>
         <div class="exp-product-body">
           <div><div class="exp-field-label">Qtde (Emb.)</div><div class="exp-field-value">${b.qtde||'—'}</div></div>
           <div><div class="exp-field-label">Custo / Emb.</div><div class="exp-field-value">${custoEmb != null ? fmt.moeda(custoEmb) : '—'}</div></div>
-          <div style="grid-column:1/-1"><div class="exp-field-label">Custo Total Bonif.</div><div class="exp-field-value red">${custoTotal != null ? fmt.moeda(custoTotal) : '—'}</div></div>
+          <div><div class="exp-field-label">Custo Total</div><div class="exp-field-value red">${custoTotal != null ? fmt.moeda(custoTotal) : '—'}</div></div>
         </div>
       </div>`;
   });
+  const bonifHtml = bonifCards ? `<div class="exp-products-grid">${bonifCards}</div>` : '';
 
   let totalQtde = 0, totalU = 0, totalO = 0, validas = 0;
   for (const p of prodComCod) {
@@ -836,14 +837,14 @@ function gerarExport() {
   }
   totalO += totalBonifCusto;
 
+  const mb = totalU ? (totalU - totalO) / totalU : null;
   const totaisHtml = (validas || totalBonifCusto > 0) ? `
     <div class="exp-totals">
       <div class="exp-totals-title">Resumo Total</div>
       <div class="exp-totals-grid">
-        ${validas ? `<div><div class="exp-total-label">Qtde Total (Venda)</div><div class="exp-total-value">${totalQtde} emb.</div></div>
-        <div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>` : ''}
-        ${totalBonifCusto > 0 ? `<div class="exp-full"><div class="exp-total-label">Custo Bonificação</div><div class="exp-total-value" style="color:#ffc947">${fmt.moeda(totalBonifCusto)}</div></div>` : ''}
-        <div class="exp-full"><div class="exp-total-label">Margem Bruta % (c/ bonif.)</div><div class="exp-total-value accent">${fmt.pct(totalU ? (totalU-totalO)/totalU : null)}</div></div>
+        ${validas ? `<div><div class="exp-total-label">Faturamento</div><div class="exp-total-value">${fmt.moeda(totalU)}</div></div>` : ''}
+        ${totalBonifCusto > 0 ? `<div><div class="exp-total-label">Custo Bonif.</div><div class="exp-total-value" style="color:#ffc947">${fmt.moeda(totalBonifCusto)}</div></div>` : ''}
+        <div><div class="exp-total-label">Margem % (c/ bonif.)</div><div class="exp-total-value accent">${fmt.pct(mb)}</div></div>
       </div>
     </div>` : '';
 
