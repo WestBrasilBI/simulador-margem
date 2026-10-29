@@ -225,8 +225,8 @@
   .exp-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
   .exp-product { border: 1px solid var(--gray-border); border-radius: 6px; overflow: hidden; }
   .exp-product-hdr { background: var(--blue); color: white; padding: 3px 6px; font-size: 8px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  /* 3 campos por produto em linha única */
-  .exp-product-body { padding: 5px 6px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; }
+  /* 4 campos por produto em grade 2x2 */
+  .exp-product-body { padding: 5px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px; }
   .exp-field-label { font-size: 7px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
   .exp-field-value { font-size: 11px; font-weight: 700; color: var(--text); }
   .exp-field-value.green { color: var(--green); }
@@ -930,9 +930,10 @@ function gerarExport() {
       <div class="exp-product">
         <div class="exp-product-hdr">#${idx+1} &nbsp;${p.cod} — ${nome}</div>
         <div class="exp-product-body">
+          <div><div class="exp-field-label">Qtde</div><div class="exp-field-value">${p.qtde||'—'}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value blue">${fmt.moeda(parseFloat(p.preco)||0)}</div></div>
-          <div><div class="exp-field-label">Margem Final</div><div class="exp-field-value ${margemClass}">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
-          <div><div class="exp-field-label">Unitária (R$/L)</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
+          <div><div class="exp-field-label">Margem Líquida</div><div class="exp-field-value ${margemClass}">${calc.AD != null ? fmt.pct(calc.AD) : '—'}</div></div>
+          <div><div class="exp-field-label">Unitária Líquida</div><div class="exp-field-value">${calc.AE != null ? fmt.num(calc.AE) : '—'}</div></div>
         </div>
       </div>`;
   });
