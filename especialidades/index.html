@@ -145,7 +145,7 @@
   .exp-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 4px; }
   .exp-product { border: 1px solid var(--gray-border); border-radius: 6px; overflow: hidden; }
   .exp-product-hdr { background: var(--blue); color: white; padding: 3px 7px; font-size: 7px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .exp-product-body { padding: 5px 7px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  .exp-product-body { padding: 5px 7px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
   .exp-field-label { font-size: 6px; color: var(--gray-text); text-transform: uppercase; font-weight: 600; }
   .exp-field-value { font-size: 9px; font-weight: 700; color: var(--text); }
   .exp-field-value.green { color: var(--green); }
@@ -796,6 +796,7 @@ function gerarExport() {
       <div class="exp-product">
         <div class="exp-product-hdr">#${idx+1} ${p.cod} — ${nome}</div>
         <div class="exp-product-body">
+          <div><div class="exp-field-label">Qtde (Emb.)</div><div class="exp-field-value">${p.qtde||'—'}</div></div>
           <div><div class="exp-field-label">Preço Venda</div><div class="exp-field-value">${fmt.moeda(preco)}</div></div>
           <div><div class="exp-field-label">Margem %</div><div class="exp-field-value ${mgClass}">${calc.AB != null ? fmt.pct(calc.AB) : '—'}</div></div>
           <div><div class="exp-field-label">Unitária</div><div class="exp-field-value ${unitClass}">${unitaria != null ? fmt.moeda(unitaria) : '—'}</div></div>
