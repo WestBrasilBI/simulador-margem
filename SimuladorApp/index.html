@@ -407,10 +407,10 @@
   Atualizando app...
 </div>
 
-<script src="data/data.js"></script>
+<script src="data/data.js?v=202611061422"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=16', { updateViaCache: 'none' }).then(reg => {
+  navigator.serviceWorker.register('sw.js?v=202611061422', { updateViaCache: 'none' }).then(reg => {
     // Verifica atualização imediatamente e sempre que o app volta ao foco
     reg.update();
     document.addEventListener('visibilitychange', () => {
