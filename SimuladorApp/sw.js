@@ -1,4 +1,4 @@
-﻿const CACHE = 'simulador-mg-v16';
+﻿const CACHE = 'simulador-mg-202611061422';
 const STATIC = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
