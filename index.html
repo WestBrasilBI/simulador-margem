@@ -235,7 +235,7 @@
 
   .exp-totals { background: var(--blue); color: white; border-radius: 6px; padding: 7px 8px; margin-top: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .exp-totals-title { font-size: 8px; font-weight: 700; text-transform: uppercase; opacity: 0.75; margin-bottom: 5px; letter-spacing: 0.5px; }
-  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .exp-totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .exp-total-label { font-size: 7px; opacity: 0.7; text-transform: uppercase; font-weight: 600; }
   .exp-total-value { font-size: 12px; font-weight: 700; margin-top: 1px; }
   .exp-total-value.accent { color: #ffd166; }
@@ -380,6 +380,10 @@
         <div class="total-label">Margem Final</div>
         <div class="total-value accent" id="totMargem">—</div>
       </div>
+      <div class="total-item">
+        <div class="total-label">DPF Total</div>
+        <div class="total-value" id="totDpf">—</div>
+      </div>
       <div class="total-item full">
         <div class="total-label">Unitária Final Pós Premier</div>
         <div class="total-value accent" id="totUnitaria">—</div>
@@ -407,10 +411,10 @@
   Atualizando app...
 </div>
 
-<script src="data/data.js?v=202611090830"></script>
+<script src="data/data.js?v=202611100828"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=202611090830', { updateViaCache: 'none' }).then(reg => {
+  navigator.serviceWorker.register('sw.js?v=202611100828', { updateViaCache: 'none' }).then(reg => {
     // Verifica atualização imediatamente e sempre que o app volta ao foco
     reg.update();
     document.addEventListener('visibilitychange', () => {
@@ -881,25 +885,25 @@ function calcularLinha(p) {
   const AA = (V - Q) + Y;
   const AD = V ? ((V + Y) - Q) / V : null;
   const AE = I ? AA / I : null;
-  return { nome, I, J, L, M, AA, AB, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q, _O: O };
+  return { nome, I, J, L, M, AA, AB, AD, AE, _U: U, _V: V, _I: I, _AA: AA, _Y: Y, _Q: Q, _O: O, _M: M };
 }
 
 function calcularTotais() {
-  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, totalO=0, linhasValidas=0;
+  let totalI=0, totalU=0, totalV=0, totalY=0, totalQ=0, totalAA=0, totalO=0, totalM=0, linhasValidas=0;
   for (const p of produtos) {
     const c = calcularLinha(p);
-    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; totalO+=c._O||0; linhasValidas++; }
+    if (c._U) { totalI+=c._I||0; totalU+=c._U||0; totalV+=c._V||0; totalY+=c._Y||0; totalQ+=c._Q||0; totalAA+=c._AA||0; totalO+=c._O||0; totalM+=c._M||0; linhasValidas++; }
   }
-  return { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas };
+  return { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, totalM, linhasValidas };
 }
 
 function atualizarTotais() {
   const card = document.getElementById('totalsCard');
   if (produtos.length === 0) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, totalM, linhasValidas } = calcularTotais();
   if (!linhasValidas) {
-    ['totVolume','totFaturamento','totMargemBruta','totMargem','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    ['totVolume','totFaturamento','totMargemBruta','totMargem','totDpf','totUnitaria'].forEach(id => { document.getElementById(id).textContent = '—'; });
     return;
   }
   const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
@@ -909,6 +913,7 @@ function atualizarTotais() {
   document.getElementById('totFaturamento').textContent = fmt.moeda(totalU);
   document.getElementById('totMargemBruta').textContent = fmt.pct(totMargemBruta);
   document.getElementById('totMargem').textContent      = fmt.pct(totMargemAD);
+  document.getElementById('totDpf').textContent         = fmt.moeda(totalM);
   document.getElementById('totUnitaria').textContent    = totUnitAE != null ? fmt.num(totUnitAE) + ' R$/L' : '—';
 }
 
@@ -938,7 +943,7 @@ function gerarExport() {
       </div>`;
   });
 
-  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, linhasValidas } = calcularTotais();
+  const { totalI, totalU, totalV, totalY, totalQ, totalAA, totalO, totalM, linhasValidas } = calcularTotais();
   let totaisHtml = '';
   if (linhasValidas) {
     const totMargemBruta = totalU ? (totalU - totalO) / totalU : null;
@@ -950,6 +955,7 @@ function gerarExport() {
         <div class="exp-totals-grid">
           <div><div class="exp-total-label">Margem Bruta %</div><div class="exp-total-value">${fmt.pct(totMargemBruta)}</div></div>
           <div><div class="exp-total-label">Margem Final</div><div class="exp-total-value accent">${fmt.pct(totMargem)}</div></div>
+          <div><div class="exp-total-label">DPF Total</div><div class="exp-total-value">${fmt.moeda(totalM)}</div></div>
           <div><div class="exp-total-label">Unitária (R$/L)</div><div class="exp-total-value accent">${totUnit != null ? fmt.num(totUnit) : '—'}</div></div>
         </div>
       </div>`;
