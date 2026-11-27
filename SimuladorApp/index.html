@@ -412,6 +412,8 @@
 .opp-meta{font-size:12.5px;color:#475467;margin-top:3px}
 .opp-badges{font-size:11.5px;color:#667085;margin-top:4px}
 .opp-cod{color:#1F4E79;font-weight:600;background:#eef3fa;border-radius:5px;padding:1px 6px}
+.opp-emb{font-size:12px;color:#475467;margin-top:2px}
+.opp-mud{background:#fdecc8;color:#b54708;border-radius:5px;padding:1px 6px;font-weight:600;font-size:11px;white-space:nowrap}
 .opp-precos{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px;font-size:13px}
 .opp-precos>div{background:#f7f9fc;border-radius:7px;padding:6px 8px}
 .opp-precos .lbl{color:#667085;font-size:11px;display:block}
@@ -469,11 +471,11 @@
   Atualizando app...
 </div>
 
-<script src="data/data.js?v=202611271545"></script>
-<script src="data/oportunidades.js?v=202611271545"></script>
+<script src="data/data.js?v=202611271601"></script>
+<script src="data/oportunidades.js?v=202611271601"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=202611271545', { updateViaCache: 'none' }).then(reg => {
+  navigator.serviceWorker.register('sw.js?v=202611271601', { updateViaCache: 'none' }).then(reg => {
     // Verifica atualização imediatamente e sempre que o app volta ao foco
     reg.update();
     document.addEventListener('visibilitychange', () => {
@@ -563,6 +565,7 @@ function resetAll() {
 let oppLimite = 50, oppReady = false;
 const OTAX = 0.9075;
 function oppMoney(x){ return (x<0?'-':'')+'R$ '+Math.round(Math.abs(x)).toLocaleString('pt-BR'); }
+function oppMoneyD(x){ return 'R$ '+Number(x).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function oppPct(x){ return (x*100).toFixed(1).replace('.',',')+'%'; }
 function oppNum(x){ return x==null?'—':x.toFixed(2).replace('.',','); }
 function oppCls(m){ return m==null?'':(m>=0.1?'opp-pos':(m>=0?'opp-mid':'opp-neg')); }
@@ -638,29 +641,31 @@ function oppCard(row){
   const lucro=eAlvo?row[8]*eAlvo.u:null;
   const ePago=oppEngine(row[11],row), ePromo=row[12]!=null?oppEngine(row[12],row):null;
   const reaj=(row[13]!=null&&row[11])?((row[13]-row[11])/row[11]):null;
+  const fa=row[15], embP=rl=>(rl==null?'—':oppMoneyD(rl*fa));
   let precos='';
-  precos+='<div><span class="lbl">Pagava</span>R$ '+oppNum(row[11])+' · <span class="'+oppCls(ePago&&ePago.m)+'">'+(ePago?oppPct(ePago.m):'—')+'</span></div>';
-  if(row[12]!=null) precos+='<div><span class="lbl">Promo atual</span>R$ '+oppNum(row[12])+' · <span class="'+oppCls(ePromo&&ePromo.m)+'">'+(ePromo?oppPct(ePromo.m):'—')+'</span></div>';
-  if(row[13]!=null) precos+='<div><span class="lbl">Praticado 2026</span>R$ '+oppNum(row[13])+(reaj!=null?' · '+(reaj>=0?'+':'')+oppPct(reaj):'')+'</div>';
+  precos+='<div><span class="lbl">Pagava / emb</span>'+embP(row[11])+' · <span class="'+oppCls(ePago&&ePago.m)+'">'+(ePago?oppPct(ePago.m):'—')+'</span></div>';
+  if(row[12]!=null) precos+='<div><span class="lbl">Promo atual / emb</span>'+embP(row[12])+' · <span class="'+oppCls(ePromo&&ePromo.m)+'">'+(ePromo?oppPct(ePromo.m):'—')+'</span></div>';
+  if(row[13]!=null) precos+='<div><span class="lbl">Praticado 2026 / emb</span>'+embP(row[13])+(reaj!=null?' · '+(reaj>=0?'+':'')+oppPct(reaj):'')+'</div>';
   return '<div class="opp-card">'
     +'<div class="opp-top"><div class="opp-nome">'+nome+'</div><div class="opp-lucro '+oppCls(eAlvo&&eAlvo.m)+'">'+(lucro!=null?oppMoney(lucro)+'/ano':'—')+'</div></div>'
-    +'<div class="opp-meta"><b>'+fam+'</b> · <span class="opp-cod">cód '+row[6]+'</span></div>'
+    +'<div class="opp-meta"><b>'+fam+'</b> · <span class="opp-cod">cód '+row[6]+'</span>'+(row[19]?' <span class="opp-mud">🔁 mudança de embalagem</span>':'')+'</div>'
+    +'<div class="opp-emb">'+(OPP_EMB[row[18]]||'')+'</div>'
     +'<div class="opp-meta">'+row[8].toLocaleString('pt-BR')+' L/ano · parou há '+row[10]+' meses · últ '+row[9]+'</div>'
     +'<div class="opp-badges">'+vend+(cid?' · '+cid:'')+' · '+ramo+' · '+row[7]+' compras</div>'
     +'<div class="opp-precos">'+precos+'</div>'
-    +'<div class="opp-test">Testar preço (R$/L): <input type="number" step="0.01" inputmode="decimal" oninput="oppTestar(this)" '
-      +'data-cx="'+row[14]+'" data-fa="'+row[15]+'" data-pm="'+row[16]+'" data-dp="'+row[17]+'" data-va="'+row[8]+'">'
+    +'<div class="opp-test">Testar preço (R$/emb): <input type="number" step="0.01" inputmode="decimal" oninput="oppTestar(this)" '
+      +'data-cx="'+row[14]+'" data-fa="'+fa+'" data-pm="'+row[16]+'" data-dp="'+row[17]+'" data-va="'+row[8]+'">'
       +'<span class="opp-test-out"></span></div>'
     +'</div>';
 }
 
 function oppTestar(inp){
-  const d=inp.dataset;
-  const row=[0,0,0,0,'',0,'',0,+d.va,'',0,0,0,0,+d.cx,+d.fa,+d.pm,+d.dp];
+  const d=inp.dataset, fa=+d.fa;
+  const row=[0,0,0,0,'',0,'',0,+d.va,'',0,0,0,0,+d.cx,fa,+d.pm,+d.dp];
   const out=inp.parentNode.querySelector('.opp-test-out');
-  const price=parseFloat(inp.value);
-  if(!price){ out.textContent=''; return; }
-  const e=oppEngine(price,row);
+  const vEmb=parseFloat(inp.value);
+  if(!vEmb||!fa){ out.textContent=''; return; }
+  const e=oppEngine(vEmb/fa,row);   // input por embalagem -> R$/L
   if(!e){ out.textContent=''; return; }
   out.innerHTML='margem <span class="'+oppCls(e.m)+'">'+oppPct(e.m)+'</span> · '+oppMoney((+d.va)*e.u)+'/ano';
 }
