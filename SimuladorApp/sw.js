@@ -1,4 +1,4 @@
-﻿const CACHE = 'simulador-mg-202611271601';
+﻿const CACHE = 'simulador-mg-202611271609';
 const STATIC = ['./', './index.html', './manifest.json', './data/oportunidades.js'];
 
 self.addEventListener('install', e => {
