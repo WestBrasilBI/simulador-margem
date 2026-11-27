@@ -442,7 +442,6 @@
       <select id="oppAlvo" onchange="renderOpp()">
         <option value="pago">Preço que ele pagava</option>
         <option value="promo">Promoção atual</option>
-        <option value="atual">Preço praticado 2026</option>
         <option value="margem">Margem-alvo</option>
       </select>
       <input id="oppMargem" type="number" value="20" min="0" max="90" oninput="renderOpp()" style="display:none">
@@ -471,11 +470,11 @@
   Atualizando app...
 </div>
 
-<script src="data/data.js?v=202611271601"></script>
-<script src="data/oportunidades.js?v=202611271601"></script>
+<script src="data/data.js?v=202611271609"></script>
+<script src="data/oportunidades.js?v=202611271609"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=202611271601', { updateViaCache: 'none' }).then(reg => {
+  navigator.serviceWorker.register('sw.js?v=202611271609', { updateViaCache: 'none' }).then(reg => {
     // Verifica atualização imediatamente e sempre que o app volta ao foco
     reg.update();
     document.addEventListener('visibilitychange', () => {
@@ -640,12 +639,10 @@ function oppCard(row){
   const price=oppAlvoPreco(row), eAlvo=oppEngine(price,row);
   const lucro=eAlvo?row[8]*eAlvo.u:null;
   const ePago=oppEngine(row[11],row), ePromo=row[12]!=null?oppEngine(row[12],row):null;
-  const reaj=(row[13]!=null&&row[11])?((row[13]-row[11])/row[11]):null;
   const fa=row[15], embP=rl=>(rl==null?'—':oppMoneyD(rl*fa));
   let precos='';
   precos+='<div><span class="lbl">Pagava / emb</span>'+embP(row[11])+' · <span class="'+oppCls(ePago&&ePago.m)+'">'+(ePago?oppPct(ePago.m):'—')+'</span></div>';
   if(row[12]!=null) precos+='<div><span class="lbl">Promo atual / emb</span>'+embP(row[12])+' · <span class="'+oppCls(ePromo&&ePromo.m)+'">'+(ePromo?oppPct(ePromo.m):'—')+'</span></div>';
-  if(row[13]!=null) precos+='<div><span class="lbl">Praticado 2026 / emb</span>'+embP(row[13])+(reaj!=null?' · '+(reaj>=0?'+':'')+oppPct(reaj):'')+'</div>';
   return '<div class="opp-card">'
     +'<div class="opp-top"><div class="opp-nome">'+nome+'</div><div class="opp-lucro '+oppCls(eAlvo&&eAlvo.m)+'">'+(lucro!=null?oppMoney(lucro)+'/ano':'—')+'</div></div>'
     +'<div class="opp-meta"><b>'+fam+'</b> · <span class="opp-cod">cód '+row[6]+'</span>'+(row[19]?' <span class="opp-mud">🔁 mudança de embalagem</span>':'')+'</div>'
