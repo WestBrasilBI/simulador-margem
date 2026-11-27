@@ -332,6 +332,7 @@
       Próximo: Prazo de Pagamento →
     </button>
   </div>
+  <button class="btn-secondary" onclick="abrirOportunidades()" style="margin-top:12px">🎯 Oportunidades de recuperação</button>
   <div class="version-tag" id="versionTag">Carregando dados...</div>
 </div>
 
@@ -396,6 +397,63 @@
 </div>
 
 <!-- ═══════════════ EXPORT OVERLAY ═══════════════ -->
+<!-- ═══════════════ TELA 4: OPORTUNIDADES ═══════════════ -->
+<style>
+.opp-filtros{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.opp-filtros select,.opp-filtros input,.opp-alvo select,.opp-alvo input{width:100%;padding:9px;border:1px solid #d0d5dd;border-radius:8px;font-size:14px;box-sizing:border-box;background:#fff}
+.opp-busca{grid-column:1/3}
+.opp-alvo{display:flex;align-items:center;gap:8px;margin:2px 0 10px;font-size:13.5px;flex-wrap:wrap}
+.opp-alvo select{flex:1;min-width:140px}.opp-alvo input{width:70px}
+.opp-resumo{font-size:13px;color:#475467;margin:4px 0 10px}
+.opp-card{border:1px solid #e4e7ec;border-radius:10px;padding:12px;margin-bottom:10px;background:#fff}
+.opp-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.opp-nome{font-weight:600;font-size:15px;line-height:1.25}
+.opp-lucro{font-weight:700;font-size:14.5px;white-space:nowrap;text-align:right}
+.opp-meta{font-size:12.5px;color:#475467;margin-top:3px}
+.opp-badges{font-size:11.5px;color:#667085;margin-top:4px}
+.opp-cod{color:#1F4E79;font-weight:600;background:#eef3fa;border-radius:5px;padding:1px 6px}
+.opp-precos{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px;font-size:13px}
+.opp-precos>div{background:#f7f9fc;border-radius:7px;padding:6px 8px}
+.opp-precos .lbl{color:#667085;font-size:11px;display:block}
+.opp-pos{color:#15803d;font-weight:700}.opp-neg{color:#b42318;font-weight:700}.opp-mid{color:#b54708;font-weight:700}
+.opp-test{margin-top:9px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-top:1px dashed #e4e7ec;padding-top:9px}
+.opp-test input{width:95px;padding:6px;border:1px solid #d0d5dd;border-radius:7px}
+.opp-sub{font-size:13px;color:#667085;margin:4px 0}
+.opp-ver{font-size:11px;color:#98a2b3;margin-top:8px;text-align:center}
+</style>
+<div class="screen" id="screen4">
+  <div class="card">
+    <div class="card-title">🎯 Oportunidades de recuperação</div>
+    <p class="opp-sub">Clientes que compravam e pararam. Preço para reconquistar e a margem que fica — custo, DPF e Premier reais.</p>
+    <div class="opp-filtros">
+      <select id="oppVend" onchange="renderOpp()"></select>
+      <select id="oppCoord" onchange="renderOpp()"></select>
+      <select id="oppRamo" onchange="renderOpp()">
+        <option value="">Todos os canais</option>
+        <option value="5">Revenda</option>
+        <option value="6">Consumo (B2B)</option>
+      </select>
+      <input class="opp-busca" id="oppBusca" placeholder="Buscar cliente ou produto" oninput="renderOpp()" autocomplete="off">
+    </div>
+    <div class="opp-alvo">
+      <span>Preço alvo:</span>
+      <select id="oppAlvo" onchange="renderOpp()">
+        <option value="pago">Preço que ele pagava</option>
+        <option value="promo">Promoção atual</option>
+        <option value="atual">Preço praticado 2026</option>
+        <option value="margem">Margem-alvo</option>
+      </select>
+      <input id="oppMargem" type="number" value="20" min="0" max="90" oninput="renderOpp()" style="display:none">
+      <span id="oppMargemPct" style="display:none">%</span>
+    </div>
+    <div class="opp-resumo" id="oppResumo"></div>
+    <div id="oppLista"></div>
+    <button class="btn-primary" id="oppMais" style="display:none;margin-top:4px" onclick="oppLimite+=50;renderOpp()">Mostrar mais</button>
+    <div class="opp-ver" id="oppVersion"></div>
+  </div>
+  <button class="btn-secondary" onclick="fecharOportunidades()">← Voltar ao simulador</button>
+</div>
+
 <div id="exportOverlay">
   <div id="exportDocWrap">
     <div id="exportDoc"></div>
@@ -411,10 +469,11 @@
   Atualizando app...
 </div>
 
-<script src="data/data.js?v=202611251131"></script>
+<script src="data/data.js?v=202611271545"></script>
+<script src="data/oportunidades.js?v=202611271545"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=202611251131', { updateViaCache: 'none' }).then(reg => {
+  navigator.serviceWorker.register('sw.js?v=202611271545', { updateViaCache: 'none' }).then(reg => {
     // Verifica atualização imediatamente e sempre que o app volta ao foco
     reg.update();
     document.addEventListener('visibilitychange', () => {
@@ -498,6 +557,112 @@ function resetAll() {
   document.getElementById('produtosList').innerHTML = '';
   document.getElementById('totalsCard').style.display = 'none';
   setScreen(1);
+}
+
+// ─── TELA 4: OPORTUNIDADES ───────────────────────────────────────────────────
+let oppLimite = 50, oppReady = false;
+const OTAX = 0.9075;
+function oppMoney(x){ return (x<0?'-':'')+'R$ '+Math.round(Math.abs(x)).toLocaleString('pt-BR'); }
+function oppPct(x){ return (x*100).toFixed(1).replace('.',',')+'%'; }
+function oppNum(x){ return x==null?'—':x.toFixed(2).replace('.',','); }
+function oppCls(m){ return m==null?'':(m>=0.1?'opp-pos':(m>=0?'opp-mid':'opp-neg')); }
+
+function oppEngine(price,row){
+  const cx=row[14], fa=row[15], pm=row[16], dp=row[17];
+  if(price==null||!fa||cx==null) return null;
+  const custoLiq=(cx-dp*fa)*(pm*OTAX+(1-pm));
+  const Tv=price*fa*OTAX; if(!Tv) return null;
+  return {m:(Tv-custoLiq)/Tv, u:(Tv-custoLiq)/fa};
+}
+function oppBreakeven(row,m){
+  const cx=row[14], fa=row[15], pm=row[16], dp=row[17];
+  if(!fa||cx==null) return null;
+  return (cx-dp*fa)*(pm*OTAX+(1-pm))/(fa*OTAX*(1-(m||0)));
+}
+function oppAlvoPreco(row){
+  const a=document.getElementById('oppAlvo').value;
+  if(a==='promo') return row[12]!=null?row[12]:row[11];
+  if(a==='atual') return row[13]!=null?row[13]:row[11];
+  if(a==='margem'){ const m=(parseFloat(document.getElementById('oppMargem').value)||0)/100; return oppBreakeven(row,m); }
+  return row[11];
+}
+
+function abrirOportunidades(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen4').classList.add('active');
+  document.getElementById('stepsBar').style.display='none';
+  if(!oppReady){ oppInit(); oppReady=true; }
+  oppLimite=50; renderOpp(); window.scrollTo(0,0);
+}
+function fecharOportunidades(){ document.getElementById('stepsBar').style.display=''; setScreen(1); }
+
+function oppInit(){
+  if(typeof OPORTUNIDADES==='undefined'){ document.getElementById('oppLista').innerHTML='<div class="alert error">Dados de oportunidades não carregados.</div>'; return; }
+  const vSel=document.getElementById('oppVend'), cSel=document.getElementById('oppCoord');
+  const vs=OPP_V.map((n,i)=>[n,i]).filter(x=>x[0]).sort((a,b)=>a[0].localeCompare(b[0]));
+  vSel.innerHTML='<option value="">Todos os vendedores</option>'+vs.map(x=>'<option value="'+x[1]+'">'+x[0]+'</option>').join('');
+  const cs=OPP_CO.map((n,i)=>[n,i]).filter(x=>x[0]).sort((a,b)=>a[0].localeCompare(b[0]));
+  cSel.innerHTML='<option value="">Todos os coordenadores</option>'+cs.map(x=>'<option value="'+x[1]+'">'+x[0]+'</option>').join('');
+  const ver=document.getElementById('oppVersion'); if(ver&&typeof OPP_VERSION!=='undefined') ver.textContent='Dados de oportunidades: '+OPP_VERSION;
+}
+
+function renderOpp(){
+  if(typeof OPORTUNIDADES==='undefined') return;
+  const fv=document.getElementById('oppVend').value, fc=document.getElementById('oppCoord').value, fr=document.getElementById('oppRamo').value;
+  const q=(document.getElementById('oppBusca').value||'').trim().toUpperCase();
+  const alvo=document.getElementById('oppAlvo').value;
+  document.getElementById('oppMargem').style.display = alvo==='margem'?'':'none';
+  document.getElementById('oppMargemPct').style.display = alvo==='margem'?'':'none';
+  const lista=[];
+  for(const row of OPORTUNIDADES){
+    if(fv!=='' && String(row[2])!==fv) continue;
+    if(fc!=='' && String(row[3])!==fc) continue;
+    if(fr!=='' && row[4]!==fr) continue;
+    if(q){ const nome=(OPP_N[row[0]]||'').toUpperCase(), fam=(OPP_F[row[5]]||'').toUpperCase(), cod=(row[6]||'').toUpperCase(); if(nome.indexOf(q)<0 && fam.indexOf(q)<0 && cod.indexOf(q)<0) continue; }
+    const price=oppAlvoPreco(row), e=oppEngine(price,row);
+    lista.push({row, lucro: e? row[8]*e.u : null});
+  }
+  lista.sort((a,b)=>(b.lucro==null?-1e18:b.lucro)-(a.lucro==null?-1e18:a.lucro));
+  const npos=lista.filter(x=>x.lucro!=null&&x.lucro>0).length;
+  const soma=lista.reduce((s,x)=>s+(x.lucro&&x.lucro>0?x.lucro:0),0);
+  document.getElementById('oppResumo').innerHTML='<b>'+lista.length+'</b> oportunidades · <b>'+npos+'</b> com lucro positivo no preço alvo · potencial <b>'+oppMoney(soma)+'/ano</b>';
+  const slice=lista.slice(0,oppLimite);
+  document.getElementById('oppLista').innerHTML = slice.length? slice.map(x=>oppCard(x.row)).join('') : '<p class="opp-sub">Nenhuma oportunidade com esses filtros.</p>';
+  document.getElementById('oppMais').style.display = lista.length>oppLimite?'':'none';
+}
+
+function oppCard(row){
+  const nome=OPP_N[row[0]]||'', cid=OPP_CI[row[1]]||'', vend=OPP_V[row[2]]||'', fam=OPP_F[row[5]]||'';
+  const ramo=row[4]==='6'?'Consumo':'Revenda';
+  const price=oppAlvoPreco(row), eAlvo=oppEngine(price,row);
+  const lucro=eAlvo?row[8]*eAlvo.u:null;
+  const ePago=oppEngine(row[11],row), ePromo=row[12]!=null?oppEngine(row[12],row):null;
+  const reaj=(row[13]!=null&&row[11])?((row[13]-row[11])/row[11]):null;
+  let precos='';
+  precos+='<div><span class="lbl">Pagava</span>R$ '+oppNum(row[11])+' · <span class="'+oppCls(ePago&&ePago.m)+'">'+(ePago?oppPct(ePago.m):'—')+'</span></div>';
+  if(row[12]!=null) precos+='<div><span class="lbl">Promo atual</span>R$ '+oppNum(row[12])+' · <span class="'+oppCls(ePromo&&ePromo.m)+'">'+(ePromo?oppPct(ePromo.m):'—')+'</span></div>';
+  if(row[13]!=null) precos+='<div><span class="lbl">Praticado 2026</span>R$ '+oppNum(row[13])+(reaj!=null?' · '+(reaj>=0?'+':'')+oppPct(reaj):'')+'</div>';
+  return '<div class="opp-card">'
+    +'<div class="opp-top"><div class="opp-nome">'+nome+'</div><div class="opp-lucro '+oppCls(eAlvo&&eAlvo.m)+'">'+(lucro!=null?oppMoney(lucro)+'/ano':'—')+'</div></div>'
+    +'<div class="opp-meta"><b>'+fam+'</b> · <span class="opp-cod">cód '+row[6]+'</span></div>'
+    +'<div class="opp-meta">'+row[8].toLocaleString('pt-BR')+' L/ano · parou há '+row[10]+' meses · últ '+row[9]+'</div>'
+    +'<div class="opp-badges">'+vend+(cid?' · '+cid:'')+' · '+ramo+' · '+row[7]+' compras</div>'
+    +'<div class="opp-precos">'+precos+'</div>'
+    +'<div class="opp-test">Testar preço (R$/L): <input type="number" step="0.01" inputmode="decimal" oninput="oppTestar(this)" '
+      +'data-cx="'+row[14]+'" data-fa="'+row[15]+'" data-pm="'+row[16]+'" data-dp="'+row[17]+'" data-va="'+row[8]+'">'
+      +'<span class="opp-test-out"></span></div>'
+    +'</div>';
+}
+
+function oppTestar(inp){
+  const d=inp.dataset;
+  const row=[0,0,0,0,'',0,'',0,+d.va,'',0,0,0,0,+d.cx,+d.fa,+d.pm,+d.dp];
+  const out=inp.parentNode.querySelector('.opp-test-out');
+  const price=parseFloat(inp.value);
+  if(!price){ out.textContent=''; return; }
+  const e=oppEngine(price,row);
+  if(!e){ out.textContent=''; return; }
+  out.innerHTML='margem <span class="'+oppCls(e.m)+'">'+oppPct(e.m)+'</span> · '+oppMoney((+d.va)*e.u)+'/ano';
 }
 
 // ─── TELA 1: CLIENTE ─────────────────────────────────────────────────────────
