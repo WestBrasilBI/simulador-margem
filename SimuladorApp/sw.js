@@ -1,5 +1,5 @@
-﻿const CACHE = 'simulador-mg-202611251131';
-const STATIC = ['./', './index.html', './manifest.json'];
+﻿const CACHE = 'simulador-mg-202611271545';
+const STATIC = ['./', './index.html', './manifest.json', './data/oportunidades.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
